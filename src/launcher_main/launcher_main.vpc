@@ -19,6 +19,10 @@ $Macro OUTBINNAME	"csgo_linux64" [$LINUX64]
 
 $Include "$SRCDIR\vpc_scripts\source_exe_base.vpc"
 
+$Include "$SRCDIR\tier0\tier0_exclude.vpc"
+$Include "$SRCDIR\tier1\tier1_exclude.vpc"
+$Include "$SRCDIR\vstdlib\vstdlib_exclude.vpc"
+
 $Macro DEMOSUFFIX "_demo\"				[$DEMO]
 $MacroEmptyString DEMOSUFFIX "empty"	[!$DEMO]
 
@@ -127,31 +131,6 @@ $Configuration
 	$Linker [$PS3]
 	{
 		$AdditionalDependencies			"$BASE &quot;$(SN_PS3_PATH)/ppu/lib/sn/libsn.a&quot; &quot;$(SN_PS3_PATH)/ppu/lib/sn/libsntuner.a&quot;"
-	}
-}
-
-
-$Project
-{
-	$Folder	"Source Files"
-	{
-		-$File	"$SRCDIR\public\tier0\memoverride.cpp"	[!$PS3]
-	}
-
-	$Folder	"Link Libraries" 
-	{
-		-$File	"$LIBPUBLIC\tier0.lib" 			[$WINDOWS||$LINUX]	
-		-$File	"$LIBPUBLIC\tier1.lib"			[$WINDOWS||$LINUX]
-		-$File	"$LIBPUBLIC\vstdlib.lib"		[$WINDOWS||$LINUX]
-
-		-$File "$LIBPUBLIC\$_IMPLIB_PREFIXtier0$_IMPLIB_EXT" [$POSIX]
-		-$File "$LIBPUBLIC\$_IMPLIB_PREFIXvstdlib$_IMPLIB_EXT" [$POSIX]
-		-$File "$LIBPUBLIC\tier1$_IMPLIB_EXT"	[$POSIX]
-
-
-		-$File	"$LIBPUBLIC\tier0_360.lib" 		[$X360]
-		-$File	"$LIBPUBLIC\tier1_360.lib"		[$X360]
-		-$File	"$LIBPUBLIC\vstdlib_360.lib"	[$X360]
 	}
 }
 
