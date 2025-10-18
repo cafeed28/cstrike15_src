@@ -211,6 +211,8 @@ extern void ProcessPortalTeleportations( void );
 
 #include "bannedwords.h"
 
+#include <econ/econ_item_system.h>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -2528,6 +2530,13 @@ CEG_NOINLINE void CHLClient::LevelInitPreEntity( char const* pMapName )
 	CEG_PROTECT_MEMBER_FUNCTION( CHLClient_LevelInitPreEntity );
 
 	IGameSystem::LevelInitPreEntityAllSystems(pMapName);
+
+	GameItemSchema_t* pItemSchema = ItemSystem()->GetItemSchema();
+	if ( pItemSchema )
+	{
+		// pItemSchema->BInit( "scripts/items/items_game.txt", "MOD" );
+		pItemSchema->BInitFromDelayedBuffer();
+	}
 
 	ResetWindspeed();
 
