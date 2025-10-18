@@ -25,6 +25,7 @@
 #include "messagebox_scaleform.h"
 #include "options_scaleform.h"
 #include "motion_calibration_scaleform.h"
+#include "pausemenuscreen_scaleform.h"
 #include "howtoplaydialog_scaleform.h"
 #include "medalstatsdialog_scaleform.h"
 #include "leaderboardsdialog_scaleform.h"
@@ -453,6 +454,8 @@ void CCStrike15BasePanel::DismissAllMainMenuScreens( bool bHideMainMenuOnly )
 	{
 		if ( CCStrike15BasePanel::IsScaleformMainMenuActive() )
 			CCreateMainMenuScreenScaleform::ShowPanel( false, true );
+		if ( CCStrike15BasePanel::IsScaleformPauseMenuActive() )
+			CPauseMenuScreenScaleform::ShowMenu( false );
 	}
 	else
 	{
@@ -725,7 +728,17 @@ bool CCStrike15BasePanel::ShowLockInput( void )
 
 void CCStrike15BasePanel::OnOpenPauseMenu( void )
 {
-	CBaseModPanel::OnOpenPauseMenu();
+	if (!m_bScaleformPauseMenuEnabled)
+	{
+		CBaseModPanel::OnOpenPauseMenu();
+	}
+	else
+	{
+		if (CPauseMenuScreenScaleform::IsActive())
+			CPauseMenuScreenScaleform::ShowMenu(true);
+		else
+			CPauseMenuScreenScaleform::LoadDialog();
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -823,29 +836,29 @@ void CCStrike15BasePanel::OnOpenHowToPlayDialog( void )
 
 void CCStrike15BasePanel::DismissPauseMenu( void )
 {
-	/* Removed for partner depot */
+	CPauseMenuScreenScaleform::UnloadDialog();
 }
 
 void CCStrike15BasePanel::RestorePauseMenu( void )
 {
-	/* Removed for partner depot */
+	if (m_bScaleformPauseMenuEnabled)
+		CPauseMenuScreenScaleform::RestorePanel();
 }
 
 void CCStrike15BasePanel::ShowScaleformPauseMenu( bool bShow )
 {
-	/* Removed for partner depot */
+	if (!bShow || m_bScaleformPauseMenuEnabled)
+		CPauseMenuScreenScaleform::ShowMenu(bShow);
 }
 
 bool CCStrike15BasePanel::IsScaleformPauseMenuActive( void )
 {
-	/* Removed for partner depot */
-	return false;
+	return CPauseMenuScreenScaleform::IsActive();
 }
 
 bool CCStrike15BasePanel::IsScaleformPauseMenuVisible( void )
 {
-	/* Removed for partner depot */
-	return false;
+	return CPauseMenuScreenScaleform::IsActive() /* CPauseMenuScreenScaleform::m_pInstance->m_CScaleformComponentHostSupport_ImageCacheHelper[92] != 0 */;
 }
 
 void CCStrike15BasePanel::OnOpenDisconnectConfirmationDialog( void )

@@ -1491,4 +1491,6 @@ class ScaleformEmptyClass{};
 
 typedef ScaleformFlashInterfaceMixin<ScaleformEmptyClass> ScaleformFlashInterface;
 
+#define SFUI_CALLBACK_TODO(name) void name(SCALEFORM_CALLBACK_ARGS_DECL) { Warning(" !!! TODO: implement " #name "\n"); }
+
 #endif
