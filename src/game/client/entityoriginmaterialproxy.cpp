@@ -13,10 +13,10 @@
 #include "materialsystem/imaterialvar.h"
 #include "imaterialproxydict.h"
 
+#include "c_cs_player.h" // for grenades
+
 // NOTE: This has to be the last file included!
 #include "tier0/memdbgon.h"
-
-#include "c_cs_player.h" // for grenades
 
 class CEntityOriginMaterialProxy : public CEntityMaterialProxy
 {

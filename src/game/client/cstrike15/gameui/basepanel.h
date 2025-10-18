@@ -528,6 +528,7 @@ private:
 	// [jason] Have we been notified (via CreateStartScreen) that the signin completed successfully?
 	bool m_bStartScreenPlayerSigninCompleted;
 
+protected:
 	// [jason] Should we use the Scaleform main menu, or the old vgui one?
 	bool m_bScaleformMainMenuEnabled;
 	bool m_bScaleformPauseMenuEnabled;
@@ -535,8 +536,6 @@ private:
 	// [jason] Last value that ShowMainMenu was called with: is the old vgui active or not?
 	bool m_bMainMenuShown;
 
-
-protected:
     int m_iIntroMovieButtonPressed;
     bool m_bIntroMovieWaitForButtonToClear;
 

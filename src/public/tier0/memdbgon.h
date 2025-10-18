@@ -16,7 +16,7 @@
 // SPECIAL NOTE #2: This must be the final include in a .cpp or .h file!!!
 
 #if defined(_DEBUG) && !defined(USE_MEM_DEBUG) && !defined( _PS3 )
-#define USE_MEM_DEBUG 1
+#define USE_MEM_DEBUG 0
 #endif
 
 // If debug build or ndebug and not already included MS custom alloc files, or already included this file
