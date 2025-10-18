@@ -276,6 +276,23 @@ IViewPortPanel* CounterStrikeViewport::CreatePanelByName( const char *szPanelNam
 
 	// overwrite MOD specific panel creation
 
+ 	/*
+	if (Q_strcmp(PANEL_SCOREBOARD, szPanelName) == 0)
+ 	{
+ 		newpanel = new CScoreboardScaleform( this );
+ 	}
+ 	
+	else if ( Q_strcmp( PANEL_SPECGUI, szPanelName ) == 0 )
+ 	{
+ 		newpanel = new SFSpectator( this );
+ 	}
+ 	
+	else if ( Q_strcmp( PANEL_BUY, szPanelName ) == 0 )
+ 	{
+ 		newpanel = new CCSBuyMenuScaleform( this );
+ 	}
+	*/
+
  	if ( Q_strcmp( PANEL_TEAM, szPanelName ) == 0 )
  	{
  		newpanel = new CCSTeamMenuScaleform( this );
