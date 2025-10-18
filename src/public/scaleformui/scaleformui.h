@@ -1195,7 +1195,7 @@ public:
 
 		FlashLoaded();
 
-		#if defined(_DEBUG) 
+		#if defined(_DEBUG)
 			SFDevMsg("ScaleformUI::OnLoadFinished_%s slot=%d\n", typeid( *this ).name(), m_iFlashSlot);
 		#else
 			SFDevMsg("ScaleformUI::OnLoadFinished slot=%d\n", m_iFlashSlot);
@@ -1212,7 +1212,11 @@ public:
 
 		FlashReady();
 
+#if defined(_DEBUG)
+		SFDevMsg("ScaleformUI::OnReady_%s\n", typeid(*this).name());
+#else
 		SFDevMsg("ScaleformUI::OnReady\n");
+#endif
 	}
 
 	void OnLoadProgress( IUIMarshalHelper* pui, SFPARAMS params )
@@ -1243,7 +1247,12 @@ public:
 
 		if ( PreUnloadFlash() )
 		{
+#if defined(_DEBUG)
+			SFDevMsg("ScaleformUI::OnUnload_%s slot=%d\n", typeid(*this).name(), m_iFlashSlot);
+#else
 			SFDevMsg("ScaleformUI::OnUnload slot=%d\n", m_iFlashSlot);
+#endif
+
 			m_pScaleformUI->Params_SetResult( params, true );
 			m_bFlashAPIIsValid = false;
 			m_pScaleformUI->ReleaseValue( m_FlashAPI );
@@ -1254,7 +1263,11 @@ public:
 		}
 		else
 		{
+#if defined(_DEBUG)
+			SFDevMsg("ScaleformUI::OnUnload_%s slot=%d FAILED\n", typeid(*this).name(), m_iFlashSlot);
+#else
 			SFDevMsg("ScaleformUI::OnUnload slot=%d FAILED\n", m_iFlashSlot);
+#endif
 			m_pScaleformUI->Params_SetResult( params, false );
 		}
 	}
@@ -1269,6 +1282,11 @@ public:
 		char szName[128];
 		V_snprintf( szName, ARRAYSIZE(szName),  "ScaleformUI::RemoveFlashElement_%s", typeid( *this ).name() );		
 #endif
+
+#if defined(_DEBUG)
+		SFDevMsg("ScaleformUI::RemoveFlashElement_%s\n", typeid(*this).name());
+#endif
+
 		if ( FlashAPIIsValid() )
 		{
 			// the RemoveElement call takes care of locking for us
