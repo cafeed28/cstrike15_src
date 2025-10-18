@@ -1,0 +1,5 @@
+#!/bin/bash
+
+pushd `dirname $0`
+devtools/bin/vpc /csgo +csgo_partner /mksln csgo_partner
+popd
