@@ -452,35 +452,6 @@ else
 		$(CXX) $(CXXFLAGS) $(GENDEP_CXXFLAGS) -o $@ -c $<
 endif
 
-ifneq "$(origin VALVE_NO_AUTO_P4)" "undefined"
-	P4_EDIT_START = chmod -R +w
-	P4_EDIT_END = || true
-	P4_REVERT_START = true
-	P4_REVERT_END =
-else
-	ifndef P4_EDIT_CHANGELIST
-		# You can use an environment variable to specify what changelist to check the Linux Binaries out into. Normally the default
-		# setting is best, but here is an alternate example:
-		# export P4_EDIT_CHANGELIST_CMD="echo 1424335"
-		# ?= means that if P4_EDIT_CHANGELIST_CMD is already set it won't be changed.
-		P4_EDIT_CHANGELIST_CMD ?= p4 changes -c `p4 client -o | grep ^Client | cut -f 2` -s pending | fgrep 'POSIX Auto Checkout' | cut -d' ' -f 2 | tail -n 1
-		P4_EDIT_CHANGELIST := $(shell $(P4_EDIT_CHANGELIST_CMD))
-	endif
-	ifeq ($(P4_EDIT_CHANGELIST),)
-		# If we haven't found a changelist to check out to then create one. The name must match the one from a few
-		# lines above or else a new changelist will be created each time.
-		# Warning: the behavior of 'echo' is not consistent. In bash you need the "-e" option in order for \n to be
-		# interpreted as a line-feed, but in dash you do not, and if "-e" is passed along then it is printed, which
-		# confuses p4. So, if you run this command from the bash shell don't forget to add "-e" to the echo command.
-		P4_EDIT_CHANGELIST = $(shell echo "Change: new\nDescription: POSIX Auto Checkout" | p4 change -i | cut -f 2 -d ' ')
-	endif
-
-	P4_EDIT_START := for f in
-	P4_EDIT_END := ; do if [ -n $$f ]; then if [ -d $$f ]; then find $$f -type f -print | p4 -x - edit -c $(P4_EDIT_CHANGELIST); else p4 edit -c $(P4_EDIT_CHANGELIST) $$f; fi; fi; done $(QUIET_ECHO_POSTFIX)
-	P4_REVERT_START := for f in  
-	P4_REVERT_END := ; do if [ -n $$f ]; then if [ -d $$f ]; then find $$f -type f -print | p4 -x - revert; else p4 revert $$f; fi; fi; done $(QUIET_ECHO_POSTFIX) 
-endif
-
 ifeq ($(CONFTYPE),dll)
 all: $(OTHER_DEPENDENCIES) $(OBJS) $(GAMEOUTPUTFILE)
 	@echo $(GAMEOUTPUTFILE) $(QUIET_ECHO_POSTFIX)
@@ -517,25 +488,15 @@ ifneq "$(OBJ_DIR)" ""
 	$(QUIET_PREFIX) echo "rm -rf $(OBJ_DIR)"
 	$(QUIET_PREFIX) rm -rf $(OBJ_DIR)
 endif
-ifneq "$(OUTPUTFILE)" ""
-	$(QUIET_PREFIX) if [ -e $(OUTPUTFILE) ]; then \
-		echo "p4 revert $(OUTPUTFILE)"; \
-		$(P4_REVERT_START) $(OUTPUTFILE) $(OUTPUTFILE)$(SYM_EXT) $(P4_REVERT_END); \
-	fi;
-endif
 ifneq "$(OTHER_DEPENDENCIES)" ""
 	$(QUIET_PREFIX) echo "rm -f $(OTHER_DEPENDENCIES)"
 ifneq "$(GAMEOUTPUTFILE)" ""
 endif
 	$(QUIET_PREFIX) rm -f $(OTHER_DEPENDENCIES)
 endif
-ifneq "$(GAMEOUTPUTFILE)" ""
-	$(QUIET_PREFIX) echo "p4 revert $(GAMEOUTPUTFILE)"
-	$(QUIET_PREFIX) $(P4_REVERT_START) $(GAMEOUTPUTFILE) $(GAMEOUTPUTFILE)$(SYM_EXT) $(P4_REVERT_END)
-endif
 
 
-# Do the above cleaning, except with p4 edit and rm. Reason being ar crs adds and replaces obj files to the
+# Do the above cleaning, except with rm. Reason being ar crs adds and replaces obj files to the
 # archive. However if you've renamed or deleted a source file, $(AR) won't remove it. This can leave
 # us with archive files that have extra unused symbols, and also potentially cause compilation errors
 # when you rename a file and have many duplicate symbols.
@@ -546,8 +507,7 @@ ifneq "$(OBJ_DIR)" ""
 endif
 ifneq "$(OUTPUTFILE)" ""
 	$(QUIET_PREFIX) if [ -e $(OUTPUTFILE) ]; then \
-		echo "p4 edit and rm -f $(OUTPUTFILE) $(OUTPUTFILE)$(SYM_EXT)"; \
-		$(P4_EDIT_START) $(OUTPUTFILE) $(OUTPUTFILE)$(SYM_EXT) $(P4_EDIT_END); \
+		echo "rm -f $(OUTPUTFILE) $(OUTPUTFILE)$(SYM_EXT)"; \
 	fi;
 	$(QUIET_PREFIX) -rm -f $(OUTPUTFILE) $(OUTPUTFILE)$(SYM_EXT);
 endif
@@ -556,8 +516,7 @@ ifneq "$(OTHER_DEPENDENCIES)" ""
 	$(QUIET_PREFIX) -rm -f $(OTHER_DEPENDENCIES)
 endif
 ifneq "$(GAMEOUTPUTFILE)" ""
-	$(QUIET_PREFIX) echo "p4 edit and rm -f $(GAMEOUTPUTFILE) $(GAMEOUTPUTFILE)$(SYM_EXT)"
-	$(QUIET_PREFIX) $(P4_EDIT_START) $(GAMEOUTPUTFILE) $(GAMEOUTPUTFILE)$(SYM_EXT) $(P4_EDIT_END)
+	$(QUIET_PREFIX) echo "rm -f $(GAMEOUTPUTFILE) $(GAMEOUTPUTFILE)$(SYM_EXT)"
 	$(QUIET_PREFIX) -rm -f $(GAMEOUTPUTFILE)
 endif
 
@@ -568,21 +527,17 @@ cleantargets:
 
 
 $(LIB_File): $(OTHER_DEPENDENCIES) $(OBJS) 
-	$(QUIET_PREFIX) -$(P4_EDIT_START) $(LIB_File) $(P4_EDIT_END); 
 	$(QUIET_PREFIX) $(AR) $(LIB_File) $(OBJS) $(LIBFILES);
 
 SO_GameOutputFile = $(GAMEOUTPUTFILE)
 
 $(SO_GameOutputFile): $(SO_File)
 	$(QUIET_PREFIX) \
-	$(P4_EDIT_START) $(GAMEOUTPUTFILE) $(P4_EDIT_END) && \
 	echo "----" $(QUIET_ECHO_POSTFIX);\
 	echo "---- COPYING TO $@ [$(CFG)] ----";\
 	echo "----" $(QUIET_ECHO_POSTFIX);
-	$(QUIET_PREFIX) -$(P4_EDIT_START) $(GAMEOUTPUTFILE) $(P4_EDIT_END);
 	$(QUIET_PREFIX) -mkdir -p `dirname $(GAMEOUTPUTFILE)` > /dev/null;
 	$(QUIET_PREFIX) cp -v $(OUTPUTFILE) $(GAMEOUTPUTFILE) $(QUIET_ECHO_POSTFIX);
-	$(QUIET_PREFIX) -$(P4_EDIT_START) $(GAMEOUTPUTFILE)$(SYM_EXT) $(P4_EDIT_END);
 	$(QUIET_PREFIX) $(GEN_SYM) $(GAMEOUTPUTFILE); 
 	$(QUIET_PREFIX) -$(STRIP) $(GAMEOUTPUTFILE);
 	$(QUIET_PREFIX) $(VSIGN) -signvalve $(GAMEOUTPUTFILE);
@@ -590,7 +545,6 @@ $(SO_GameOutputFile): $(SO_File)
 		echo "----" $(QUIET_ECHO_POSTFIX);\
 		echo "---- COPYING TO IMPORT LIBRARY $(IMPORTLIBRARY) ----";\
 		echo "----" $(QUIET_ECHO_POSTFIX);\
-		$(P4_EDIT_START) $(IMPORTLIBRARY) $(P4_EDIT_END) && \
 		mkdir -p `dirname $(IMPORTLIBRARY)` > /dev/null && \
 		cp -v $(OUTPUTFILE) $(IMPORTLIBRARY); \
 	fi;
@@ -612,9 +566,7 @@ $(EXE_File) : $(OTHER_DEPENDENCIES) $(OBJS) $(LIBFILENAMES)
 	echo "---- LINKING EXE $@ [$(CFG)] ----";\
 	echo "----" $(QUIET_ECHO_POSTFIX);\
 	\
-	$(P4_EDIT_START) $(OUTPUTFILE) $(P4_EDIT_END);\
 	$(LINK) $(LINK_MAP_FLAGS) $(LDFLAGS) $(PROFILE_LINKER_FLAG) -o $(OUTPUTFILE) $(LIB_START_EXE) $(OBJS) $(LIBFILES) $(SystemLibraries) $(LIB_END_EXE);
-	$(QUIET_PREFIX) -$(P4_EDIT_START) $(OUTPUTFILE)$(SYM_EXT) $(P4_EDIT_END);
 	$(QUIET_PREFIX) $(GEN_SYM) $(OUTPUTFILE);
 	$(QUIET_PREFIX) -$(STRIP) $(OUTPUTFILE);
 	$(QUIET_PREFIX) $(VSIGN) -signvalve $(OUTPUTFILE);
@@ -622,8 +574,6 @@ $(EXE_File) : $(OTHER_DEPENDENCIES) $(OBJS) $(LIBFILENAMES)
 
 tags:
 	etags -a -C -o $(SRCROOT)/TAGS *.cpp *.cxx *.h *.hxx
-
-P4EXE ?= p4
 
 # DETECT_STRING_CHANGE_BETWEEN_BUILDS is a macro that lets you update the timestamp on a file whenever a string changes between invokations of make
 #  This lets us know that our compile flags are consistent with the last time we ran and avoid overbuilding

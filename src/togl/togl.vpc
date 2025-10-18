@@ -43,12 +43,6 @@ $Configuration
 	{
 		$GameOutputFile                                 "$OUTBINDIR/$_IMPLIB_PREFIX$OUTBINNAME$_DLL_EXT"
 	}
-
-	$PreLinkEvent [$WINDOWS]
-	{
-		$CommandLine	"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $LIBPUBLIC\$(TargetName).lib $SRCDIR" "\n" \
-						"$BASE"
-	}
 }
 
 $Project "togl"

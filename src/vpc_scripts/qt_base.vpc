@@ -38,15 +38,10 @@ $Macro QT_DESCRIPTION_MOC			"Processing QT Keywords: $(InputFileName)"
 $Macro QT_DESCRIPTION_UI			"Processing UI Form: $(InputFileName)"
 $Macro QT_DESCRIPTION_QRC			"Processing QRC: $(InputFileName)"
 
-$Macro QT_PREBUILD_H   				"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $QT_OUTPUT_H $SRCDIR " "\n"
-$Macro QT_PREBUILD_MOC				"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $QT_OUTPUT_MOC $SRCDIR " "\n"
-$Macro QT_PREBUILD_UI   			"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $QT_OUTPUT_UI $SRCDIR " "\n"
-$Macro QT_PREBUILD_QRC   			"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $QT_OUTPUT_QRC $SRCDIR " "\n"
-
-$Macro QT_CUSTOM_BUILD_H			"$QT_PREBUILD_H $QT_MOC_COMMAND_PREFIX $QT_COMMAND_SUFFIX_H"
-$Macro QT_CUSTOM_BUILD_MOC			"$QT_PREBUILD_MOC $QT_MOC_COMMAND_PREFIX $QT_COMMAND_SUFFIX_MOC"
-$Macro QT_CUSTOM_BUILD_UI			"$QT_PREBUILD_UI $QT_UI_COMMAND_PREFIX $QT_COMMAND_SUFFIX_UI"
-$Macro QT_CUSTOM_BUILD_QRC			"$QT_PREBUILD_QRC $QT_QRC_COMMAND_PREFIX $QT_COMMAND_SUFFIX_QRC"
+$Macro QT_CUSTOM_BUILD_H			"$QT_MOC_COMMAND_PREFIX $QT_COMMAND_SUFFIX_H"
+$Macro QT_CUSTOM_BUILD_MOC			"$QT_MOC_COMMAND_PREFIX $QT_COMMAND_SUFFIX_MOC"
+$Macro QT_CUSTOM_BUILD_UI			"$QT_UI_COMMAND_PREFIX $QT_COMMAND_SUFFIX_UI"
+$Macro QT_CUSTOM_BUILD_QRC			"$QT_QRC_COMMAND_PREFIX $QT_COMMAND_SUFFIX_QRC"
 
 // <xxxx>.cpp files that have Q_OBJECT need to have moc.exe run on them to generate <xxxx>.moc
 // having a <xxxx>.moc in the project guarantees a pre build dependency and runs moc.exe on the <xxxx>.cpp file

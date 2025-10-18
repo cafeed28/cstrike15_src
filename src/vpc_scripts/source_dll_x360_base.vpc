@@ -72,10 +72,8 @@ $Configuration
 
 	$PostBuildEvent
 	{
-		$CommandLine			"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTBINDIR\$(TargetFileName) $SRCDIR" "\n" \
-								"copy $(TargetDir)$(TargetName)_converted.dll $OUTBINDIR\$(TargetFileName)" "\n" \
+		$CommandLine			"copy $(TargetDir)$(TargetName)_converted.dll $OUTBINDIR\$(TargetFileName)" "\n" \
 								"if exist $(TargetDir)$(TargetName).map copy $(TargetDir)$(TargetName).map $OUTBINDIR\$(TargetName).map" "\n" \
-								"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTBINDIR\$(TargetName).pdb $SRCDIR" "\n" \
 								"copy $(TargetDir)$(TargetName).pdb $OUTBINDIR\$(TargetName).pdb" "\n" \
 								"copy $(TargetDir)$(TargetName).xdb $OUTBINDIR\$(TargetName).xdb" "\n" \
 								"call $SRCDIR\vpc_scripts\valve_xbcp_wrapper.cmd $(TargetDir)$(TargetName)_converted.dll $(RemoteRoot)\$DEVKITBINDIR\$(TargetFileName)" "\n" \

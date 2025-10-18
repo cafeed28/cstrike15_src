@@ -71,13 +71,9 @@ $Configuration
 		// tier0, vstdlib, p4lib, filesystem_stdio
 
 		$CommandLine		"$BASE" "\n" \
-							"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $SRCDIR\devtools\bin\vstdlib.dll $SRCDIR $QUOTEVPC Auto Checkout$QUOTE" "\n" \
 							"copy $SRCDIR\..\game\bin\vstdlib.dll $SRCDIR\devtools\bin" "\n" \
-							"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $SRCDIR\devtools\bin\tier0.dll $SRCDIR $QUOTEVPC Auto Checkout$QUOTE" "\n" \
 							"copy $SRCDIR\..\game\bin\tier0.dll $SRCDIR\devtools\bin" "\n" \
-							"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $SRCDIR\devtools\bin\filesystem_stdio.dll $SRCDIR $QUOTEVPC Auto Checkout$QUOTE" "\n" \
 							"copy $SRCDIR\..\game\bin\filesystem_stdio.dll $SRCDIR\devtools\bin" "\n" \
-							"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $SRCDIR\devtools\bin\p4lib.dll $SRCDIR $QUOTEVPC Auto Checkout$QUOTE" "\n" \
 							"copy $SRCDIR\..\game\bin\p4lib.dll $SRCDIR\devtools\bin" "\n" \
 							"echo Check in contents of changelist $QUOTEVPC Auto Checkout$QUOTE"
 	}

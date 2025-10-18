@@ -49,11 +49,6 @@ $Configuration
 		$Description			"Creating version number."
 		$ExcludedFromBuild		"No"
 	}
-
-	$PreLinkEvent
-	{
-		$CommandLine		"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTLIBDIR\$(TargetName).lib $SRCDIR"
-	}
 }
 
 // Skeleton Project - All derived projects get this as a starting base

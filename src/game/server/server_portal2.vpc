@@ -50,20 +50,15 @@ $Configuration
 		$CommandLine	"if exist $OUTCEGDIR goto CegExists" "\n" \
 						"mkdir $OUTCEGDIR" "\n" \
 						":CegExists" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTCEGDIR\$(TargetFileName).original $SRCDIR" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTCEGDIR\$(TargetFileName).stripped $SRCDIR" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTCEGDIR\$(TargetFileName).strips $SRCDIR" "\n" \	
 						"ECHO Generating CEG binaries..." "\n" \
 						"$(ProjectDir)\..\..\devtools\bin\ceg\drmpe -drm:$(TargetPath) -path:$(ProjectDir)\..\..\devtools\bin\ceg -drmout:$(TargetPath).ceg -output:$OUTCEGDIR -logfile:$(IntDir)\drmpe.log -drmclean" "\n" \
 						"copy $(TargetPath).ceg $(TargetPath)" "\n"	\
 						"if exist $OUTBINDIR goto ValveStart" "\n" \
 						"mkdir $OUTBINDIR" "\n" \
 						":ValveStart" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTBINDIR\$(TargetFileName) $SRCDIR" "\n" \
 						"copy $QUOTE$(TargetDir)$QUOTE$(TargetFileName) $OUTBINDIR\$(TargetFileName)" "\n" \
 						"if ERRORLEVEL 1 goto BuildEventFailed" "\n" \
 						"if exist $QUOTE$(TargetDir)$QUOTE$(TargetName).map copy $QUOTE$(TargetDir)$QUOTE$(TargetName).map $OUTBINDIR\$(TargetName).map" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTBINDIR\$(TargetName).pdb $SRCDIR" "\n" \
 						"copy $QUOTE$(TargetDir)$QUOTE$(TargetName).pdb $OUTBINDIR\$(TargetName).pdb" "\n" \
 						"if ERRORLEVEL 1 goto BuildEventFailed" "\n" \
 						"goto BuildEventOK" "\n" \
@@ -76,9 +71,6 @@ $Configuration
 		$CommandLine	"if exist $OUTCEGDIR goto CegExists" "\n" \
 						"mkdir $OUTCEGDIR" "\n" \
 						":CegExists" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTCEGDIR\$(TargetFileName).original $SRCDIR" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTCEGDIR\$(TargetFileName).stripped $SRCDIR" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTCEGDIR\$(TargetFileName).strips $SRCDIR" "\n" \
 						"ECHO Generating CEG binaries..." "\n" \
 						"$(ProjectDir)\..\..\devtools\bin\ceg\drmpe -path:$(ProjectDir)\..\..\devtools\bin\ceg -split:$(TargetPath) -logfile:$(IntDir)\drmpe.log" "\n" \
 						"if exist drmpe.cfg del /f drmpe.cfg" "\n" \
@@ -95,11 +87,9 @@ $Configuration
 						"if exist $OUTBINDIR goto ValveStart" "\n" \
 						"mkdir $OUTBINDIR" "\n" \
 						":ValveStart" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTBINDIR\$(TargetFileName) $SRCDIR" "\n" \
 						"copy $QUOTE$(TargetDir)$QUOTE$(TargetFileName) $OUTBINDIR\$(TargetFileName)" "\n" \
 						"if ERRORLEVEL 1 goto BuildEventFailed" "\n" \
 						"if exist $QUOTE$(TargetDir)$QUOTE$(TargetName).map copy $QUOTE$(TargetDir)$QUOTE$(TargetName).map $OUTBINDIR\$(TargetName).map" "\n" \
-						"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTBINDIR\$(TargetName).pdb $SRCDIR" "\n" \
 						"copy $QUOTE$(TargetDir)$QUOTE$(TargetName).pdb $OUTBINDIR\$(TargetName).pdb" "\n" \
 						"if ERRORLEVEL 1 goto BuildEventFailed" "\n" \
 						"goto BuildEventOK" "\n" \

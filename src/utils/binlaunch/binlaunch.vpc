@@ -18,12 +18,10 @@ $Configuration
 		$CommandLine		"$BASE" "\n" \
 							"\n" \
 							"echo ... Copying BINLAUNCH.EXE to REMOTEMIRROR.EXE" "\n" \
-							"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $SRCDIR\devtools\bin\remotemirror.exe $SRCDIR" "\n" \
 							"copy $OUTBINDIR\$(TargetFileName) $SRCDIR\devtools\bin\remotemirror.exe" "\n" \
 							"if ERRORLEVEL 1 goto BinLaunchCopyFailed" "\n" \
 							"\n" \
 							"echo ... Copying BINLAUNCH.EXE to SCHEMACOMPILER.EXE" "\n" \
-							"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $SRCDIR\devtools\bin\schemacompiler.exe $SRCDIR" "\n" \
 							"copy $OUTBINDIR\$(TargetFileName) $SRCDIR\devtools\bin\schemacompiler.exe" "\n" \
 							"if ERRORLEVEL 1 goto BinLaunchCopyFailed" "\n" \
 							"\n" \

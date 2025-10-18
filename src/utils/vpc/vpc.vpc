@@ -36,7 +36,6 @@ $Configuration
 		$CommandLine		"$BASE" "\n" \
 							"\n" \
 							"echo ... Copying BINLAUNCH.EXE to VPC.EXE" "\n" \
-							"call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $OUTBINDIR\vpc.exe $SRCDIR" "\n" \
 							"copy $SRCDIR\devtools\bin\binlaunch.exe $OUTBINDIR\vpc.exe" "\n" \
 							"if ERRORLEVEL 1 goto BinLaunchCopyFailed" "\n" \
 							"\n" \
