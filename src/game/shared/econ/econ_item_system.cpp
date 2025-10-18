@@ -95,6 +95,7 @@ CEconItemSystem::~CEconItemSystem( void )
 //-----------------------------------------------------------------------------
 void CEconItemSystem::Init( void )
 {
+	ParseItemSchemaFile( "scripts/items/items_game.txt" );
 #ifdef CLIENT_DLL
 	IGameEvent *event = gameeventmanager->CreateEvent( "item_schema_initialized" );
 	if ( event )
