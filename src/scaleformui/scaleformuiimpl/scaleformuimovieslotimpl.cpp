@@ -325,7 +325,7 @@ void ScaleformUIImpl::RenderSlot( int slot )
     
 	if ( m_pRenderHAL )
 	{
-		m_pRenderHAL->GetTextureManager()->SetRenderThreadIdToCurrentThread();
+		// m_pRenderHAL->GetTextureManager()->SetRenderThreadIdToCurrentThread();
 
 		if ( m_bClearMeshCacheQueued )
 		{

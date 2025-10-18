@@ -354,13 +354,13 @@ void ScaleformUIImpl::SetSingleThreadedMode( bool bSingleThreded )
 
 	if ( m_bSingleThreaded )
 	{
-		m_pRenderHAL->GetTextureManager()->SetRenderThreadIdToCurrentThread();
+		// m_pRenderHAL->GetTextureManager()->SetRenderThreadIdToCurrentThread();
 	}
 	else
 	{
 		// RenderThreadId will be set in RenderSlot - Just reseting for now
 		// so that textures are not created on the main thread.
-		m_pRenderHAL->GetTextureManager()->ResetRenderThreadId();
+		// m_pRenderHAL->GetTextureManager()->ResetRenderThreadId();
 	}
 }
 

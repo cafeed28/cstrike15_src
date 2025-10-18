@@ -196,7 +196,7 @@ void DumpMeshBufferSetStats( D3D9::MeshBufferSet *pMBSet )
 {
 	int totalMem = 0;
 
-	for ( int i = 0; i < MC_NUM_BUFFER_BUCKETS; i++ )
+	/* for (int i = 0; i < MC_NUM_BUFFER_BUCKETS; i++)
 	{
 		D3D9::MeshBufferBucket *pBucket = &pMBSet->m_buckets[i];
 
@@ -207,7 +207,7 @@ void DumpMeshBufferSetStats( D3D9::MeshBufferSet *pMBSet )
 		totalMem += pBucket->m_totalMemUsed;
 	}
 
-	Msg( "Total = %d KB\n", totalMem/1024 );	
+	Msg( "Total = %d KB\n", totalMem/1024 ); */
 
 }
 #endif
@@ -226,10 +226,10 @@ void ScaleformUIImpl::DumpMeshCacheStats( void )
 
 	// Log stats
 	Msg( "SF MeshBufferSet, VB mem summary\n" );
-	DumpMeshBufferSetStats( &mc->VertexBuffers );
+	// DumpMeshBufferSetStats( &mc->VertexBuffers );
 
 	Msg( "SF MeshBufferSet, IB mem summary\n" );
-	DumpMeshBufferSetStats( &mc->IndexBuffers );
+	// DumpMeshBufferSetStats( &mc->IndexBuffers );
 
 #endif
 }

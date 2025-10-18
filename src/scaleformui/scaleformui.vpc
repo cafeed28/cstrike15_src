@@ -64,7 +64,7 @@ $Configuration
 
 	$Linker
 	{
-		$AdditionalDependencies			"$BASE winmm.lib libgfx.lib libgfx_as2.lib libgfx_as3.lib libgfxexpat.lib libgfx_ime.lib libgfxvideo.lib libjpeg.lib zlib.lib libpng.lib Ws2_32.lib imm32.lib oleaut32.lib" [$WINDOWS]
+		$AdditionalDependencies			"$BASE winmm.lib libgfx.lib libgfx_as2.lib libgfx_as3.lib libgfxexpat.lib libjpeg.lib zlib.lib libpng.lib Ws2_32.lib imm32.lib oleaut32.lib" [$WINDOWS]
 		$AdditionalDependencies			"$BASE libgfxplatform_d3d9.lib libgfxrender_d3d9.lib" [$WINDOWS && !$GL]
 		$AdditionalDependencies			"$BASE OpenGL32.lib libgfxplatform_GL.lib libgfxrender_GL.lib" [$GL]
 		$AdditionalDependencies			"$BASE legacy_stdio_definitions.lib" [$WINDOWS && $VS2015]

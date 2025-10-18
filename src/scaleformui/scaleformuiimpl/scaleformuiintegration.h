@@ -33,6 +33,11 @@ public:
 	virtual void LogMessageVarg( SF::LogMessageId messageId, const char* pfmt, va_list argList );
 };
 
+class ScaleformeUIIMEManager: public SF::GFx::IMEManagerBase
+{
+public:
+};
+
 
 /******************************************************
  * gives scaleform access tot he clipboard
