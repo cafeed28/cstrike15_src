@@ -2106,6 +2106,11 @@ bool CBaseCombatWeapon::Holster( CBaseCombatWeapon *pSwitchingTo )
 		localMaxs.z += 15;	// Leave some space at the top.
 	}
 
+	bool CBaseCombatWeapon::OnFireEvent( C_BaseViewModel *pViewModel, const Vector& origin, const QAngle& angles, int event, const char *options )
+	{
+		return BaseClass::OnFireEvent( pViewModel, origin, angles, event, options );
+	}
+
 #else
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -3388,12 +3393,12 @@ END_NETWORK_TABLE()
 
 const CEconItemView* CBaseCombatWeapon::GetEconItemView( void ) const
 {
-	return nullptr;
+	return BaseClass::GetEconItemView();
 }
 
 CEconItemView* CBaseCombatWeapon::GetEconItemView( void )
 {
-	return nullptr;
+	return ( CEconItemView* )BaseClass::GetEconItemView();
 }
 
 int CBaseCombatWeapon::GetReserveAmmoCount( AmmoPosition_t nAmmoPosition, CBaseCombatCharacter * pForcedOwner/* = NULL*/  )
