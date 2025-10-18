@@ -29,6 +29,7 @@
 #include "howtoplaydialog_scaleform.h"
 #include "medalstatsdialog_scaleform.h"
 #include "leaderboardsdialog_scaleform.h"
+#include "singleplayergamedialog_scaleform.h"
 #include "overwatchresolution_scaleform.h"
 #include "HUD/sfhudcallvotepanel.h"
 #include "upsell_scaleform.h"
@@ -535,7 +536,7 @@ bool CCStrike15BasePanel::IsScaleformMainMenuActive( void )
 
 void CCStrike15BasePanel::OnOpenCreateSingleplayerGameDialog( bool bMatchmakingFilter )
 {
-	/* Removed for partner depot */
+	CCreateSinglePlayerGameDialogScaleform::LoadDialog( bMatchmakingFilter, false, false );
 }
 
 void CCStrike15BasePanel::OnOpenCreateMultiplayerGameDialog( void )
