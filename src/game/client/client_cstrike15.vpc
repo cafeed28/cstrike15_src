@@ -620,6 +620,8 @@ $Project "Client (CSGO)"
 
 			$Folder "sfcomponents"
 			{
+				$File	"cstrike15\uicomponents\uicomponent_common.cpp"
+				$File	"cstrike15\uicomponents\uicomponent_common.h"
 			}
 
 			$Folder	"vgui"

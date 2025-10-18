@@ -125,6 +125,8 @@ extern const char *COM_GetModDirectory( void );
 
 extern bool bSteamCommunityFriendsVersion;
 
+static CUtlVector< IUiComponentGlobalInstanceBase* > g_arrScaleformComponents;
+
 #ifdef _PS3
 static CellUserInfoUserStat s_userStat;
 #endif
@@ -649,6 +651,21 @@ CBaseModPanel::CBaseModPanel( const char *panelName ) : Panel(NULL, panelName )
 // 
 // 		SteamClient()->BReleaseSteamPipe( steamPipe );
 // 	}
+
+#if defined( INCLUDE_SCALEFORM )
+	//arrScaleformComponents.InsertBefore(0, CScaleformUiComponent_ImageCache::Instance());
+
+	FOR_EACH_VEC(g_arrScaleformComponents, i)
+	{
+		g_arrScaleformComponents[i]->InstallScaleformBindings(SF_FULL_SCREEN_SLOT);
+	}
+
+	auto& arrUiComponents = GameUI().GetUiComponents();
+	FOR_EACH_VEC(arrUiComponents, j)
+	{
+		arrUiComponents[j]->InstallScaleformBindings(SF_FULL_SCREEN_SLOT);
+	}
+#endif
 
 	CreateGameMenu();
 	CreateGameLogo();
@@ -1628,6 +1645,11 @@ void CBaseModPanel::RunFrame()
 	{
 		static ConVarRef sf_ui_tint_munge( "sf_ui_tint" );
 		sf_ui_tint_munge.SetValue( 0x10 );
+	}
+
+	FOR_EACH_VEC(g_arrScaleformComponents, i)
+	{
+		g_arrScaleformComponents[i]->Tick();
 	}
 
 	// Tick all screens that need to update synchronously

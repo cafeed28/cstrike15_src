@@ -61,6 +61,7 @@ using namespace vgui;
 CCreateMainMenuScreenScaleform* CCreateMainMenuScreenScaleform::m_pInstance = NULL;
 
 SFUI_BEGIN_GAME_API_DEF
+	SF_COMPONENT_HOST_API_DEF(),
 	SFUI_DECL_METHOD( BasePanelRunCommand ),
 	SFUI_DECL_METHOD( IsMultiplayerPrivilegeEnabled ),
 	SFUI_DECL_METHOD( LaunchTraining ),

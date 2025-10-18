@@ -14,6 +14,7 @@
 
 #include "matchmaking/imatchframework.h"
 #include "scaleformui/scaleformui.h"
+#include "uicomponents/uicomponent_common.h"
 #include "messagebox_scaleform.h"
 
 class CCreateMainMenuScreenScaleform : public ScaleformFlashInterface, public IMessageBoxEventCallback, public IShaderDeviceDependentObject, public IMatchEventsSink
@@ -35,6 +36,8 @@ public:
 	virtual bool OnMessageBoxEvent( MessageBoxFlags_t buttonPressed );
 
 	virtual void OnEvent( KeyValues *pEvent );
+
+	SF_COMPONENT_HOST_DECL();
 
 	// Called to trigger commands on the BasePanel, like opening other dialogs, configuring options, etc.
 	//  See the CBaseModPanel::RunMenuCommand function for specific available commands.

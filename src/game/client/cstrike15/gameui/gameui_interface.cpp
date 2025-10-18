@@ -339,6 +339,39 @@ void CGameUI::Initialize( CreateInterfaceFn factory )
 	}
 
 #endif
+
+#if defined( INCLUDE_SCALEFORM )
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_FriendsList::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_MyPersona::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_PartyList::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Store::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Inventory::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Loadout::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Medals::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_MatchInfo::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_MatchList::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Predictions::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Fantasy::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_CompetitiveMatch::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_DataGraph::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_GameTypes::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_GlobalGame::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Leaderboards::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_MatchDraft::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_News::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_SteamOverlay::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Streams::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Overwatch::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_UGC::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_ItemData::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Blog::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_EmbeddedStream::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Guides::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_MatchStats::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_PartyBrowser::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_Teammates::GetInstance());
+	//m_arrUiComponents.InsertBefore(0, CUiComponent_IME::GetInstance());
+#endif
 	
 	if ( bFailed )
 	{

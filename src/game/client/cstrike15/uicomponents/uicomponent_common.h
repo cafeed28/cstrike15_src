@@ -45,6 +45,7 @@
 #endif
 
 #include "bannedwords.h"
+#include "econ_item_view_helpers.h"
 
 class IUiComponentGlobalInstanceBase
 {
@@ -96,6 +97,90 @@ public:
 		classname( const classname & other ); \
 		classname & operator = ( const classname & other ); \
 		DECLARE_PANORAMA_JSREGISTERFUNC
+
+
+class CScaleformComponentHostSupport_ImageCacheHelper
+{
+protected:
+	typedef CUtlMap<uint64, double> ImageCache_t;
+
+	ImageCache_t m_mapAvatarImages;
+	ImageCache_t m_mapInventoryImages;
+	bool bCachingDisabled;
+
+public:
+	CScaleformComponentHostSupport_ImageCacheHelper() :
+		m_mapAvatarImages(),
+		m_mapInventoryImages(),
+		bCachingDisabled(false) {}
+
+	void EnsureAvatarCached(uint64 xuidUser)
+	{
+		if (!bCachingDisabled && xuidUser)
+		{
+			ImageCache_t::IndexType_t i = m_mapAvatarImages.Find(xuidUser);
+			float flTime = Plat_FloatTime();
+			if (i != m_mapAvatarImages.InvalidIndex())
+			{
+				m_mapAvatarImages.Element(i) = flTime;
+			}
+			else
+			{
+				m_mapAvatarImages.Insert(xuidUser, flTime);
+				g_pScaleformUI->AvatarImageAddRef(xuidUser);
+			}
+		}
+	}
+
+	void EnsureInventoryImageCached(uint64 itemID)
+	{
+		extern IScaleformInventoryImageProvider* g_pIScaleformInventoryImageProvider;
+
+		if (!bCachingDisabled && itemID)
+		{
+			ImageCache_t::IndexType_t i = m_mapInventoryImages.Find(itemID);
+			float flTime = Plat_FloatTime();
+			if (i != m_mapInventoryImages.InvalidIndex())
+			{
+				m_mapInventoryImages.Element(i) = flTime;
+			}
+			else
+			{
+				m_mapInventoryImages.Insert(itemID, flTime);
+				g_pScaleformUI->InventoryImageAddRef(itemID, g_pIScaleformInventoryImageProvider);
+			}
+		}
+	}
+
+	void EnsureItemDataImageCached(uint16 iDefIndex, uint16 iPaintIndex)
+	{
+		EnsureInventoryImageCached(CombinedItemIdMakeFromDefIndexAndPaint(iDefIndex, iPaintIndex));
+	}
+
+	void ReleaseAllReferences()
+	{
+		for (ImageCache_t::IndexType_t i = 0; i < m_mapAvatarImages.MaxElement(); ++i)
+		{
+			if (!m_mapAvatarImages.IsValidIndex(i))
+				continue;
+			g_pScaleformUI->AvatarImageRelease(m_mapAvatarImages.Key(i));
+		}
+		m_mapAvatarImages.Purge();
+
+		for (ImageCache_t::IndexType_t i = 0; i < m_mapAvatarImages.MaxElement(); ++i)
+		{
+			if (!m_mapInventoryImages.IsValidIndex(i))
+				continue;
+			g_pScaleformUI->InventoryImageRelease(m_mapInventoryImages.Key(i));
+		}
+		m_mapInventoryImages.Purge();
+	}
+
+	void EnableCaching(bool bEnable)
+	{
+		bCachingDisabled = !bEnable;
+	}
+};
 
 
 #if defined (USE_SCALEFORM_BINDINGS) || defined (TEST_SCALEFORM_EVENTS)
@@ -271,6 +356,9 @@ ScaleformComponent_##category##_##eventname##_event SF_COMPONENT_EVENT_OBJECT_NA
 #define SF_COMPONENT_FUNCTION_IMPL( classname, fnname ) \
 	void classname::SF_COMPONENT_FUNCTION_NAME(fnname)( SF_DEFAULT_PARAMS_DECL )
 
+#define SF_COMPONENT_FUNCTION_TODO( classname, fnname ) \
+	void classname::SF_COMPONENT_FUNCTION_NAME(fnname)( SF_DEFAULT_PARAMS_DECL ) { Warning(" !!! TODO: implement " #fnname "\n"); }
+
 #define SF_COMPONENT_FUNCTION_DELEGATE( ptrcomponent, fnname ) \
 	( ptrcomponent )->SF_COMPONENT_FUNCTION_NAME( fnname )( SF_DEFAULT_PARAMS_PASS )
 
@@ -312,16 +400,30 @@ ScaleformComponent_##category##_##eventname##_event SF_COMPONENT_EVENT_OBJECT_NA
 		g_pScaleformUI->RemoveGlobalObject( iSlot, g_##componentclass##_SFVALUE[iSlot] ); g_##componentclass##_SFVALUE[iSlot] = NULL; \
 		} while( 0 )
 
-#define SF_INTEGRATION_XUID_PARAM( xuidVarName, iParam ) const char * xuidVarName = 0; { \
+#define SF_INTEGRATION_XUID_PARAM( xuidVarName, iParam ) uint64 xuidVarName = 0; { \
 	if ( pui->Params_GetArgType( obj, iParam ) != IUIMarshalHelper::VT_String ) \
 		{ \
 		AssertMsg( 0, __FUNCTION__ "ActionScript passed a non string param for xuid!\n" ); \
 		return;\
 		} \
-	xuidVarName = ( pui->Params_GetArgAsString( obj, iParam ) ); \
-	}
+		const char *pFriendXuid = ( pui->Params_GetArgAsString( obj, iParam ) ); \
+		if ( !pFriendXuid ) \
+				{ \
+			/*AssertMsg( 0, __FUNCTION__ " passed an invalid xuid!\n" );*/ \
+				} \
+		CSteamID friendId( (uint64) Q_atoi64( pFriendXuid ) ); \
+		if ( !friendId.IsValid() || !friendId.BIndividualAccount() ) \
+				{ \
+			/*AssertMsg( 0, __FUNCTION__ " passed an invalid xuid!\n" );*/ \
+			xuidVarName = 0; \
+				} \
+					else \
+					{ \
+			xuidVarName = friendId.ConvertToUint64(); \
+					} \
+					}
 
-#define SF_INTEGRATION_ITEMID_PARAM( itemidVarName, iParam ) itemid_t itemidVarName = 0; { \
+#define SF_INTEGRATION_ITEMID_PARAM( itemidVarName, iParam ) uint64 itemidVarName = 0; { \
 	if ( pui->Params_GetArgType( obj, iParam ) != IUIMarshalHelper::VT_String ) \
 		{ \
 		AssertMsg( 0, __FUNCTION__ " ActionScript passed a non string param for item id!\n" ); \
