@@ -26,6 +26,8 @@
 #include "vgui/ISurface.h"
 #include "platforminputdevice.h"
 
+#include "uicomponents/uicomponent_mypersona.h"
+
 #ifndef _GAMECONSOLE
 #include "steam/steam_api.h"
 #endif
@@ -109,6 +111,7 @@ COptionsScaleform::COptionsScaleform() :
 	
 	m_iSplitScreenSlot = GET_ACTIVE_SPLITSCREEN_SLOT();
 
+	CUiComponent_MyPersona::GetInstance()->RequestAccountPrivacySettings();
 }
 
 

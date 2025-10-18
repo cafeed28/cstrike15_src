@@ -126,6 +126,8 @@ class IMatchExtPortal2 *g_pMatchExtPortal2 = &g_MatchExtPortal2;
 #include "../gameui/cstrike15/cstrike15basepanel.h"
 #include "../Scaleform/messagebox_scaleform.h"
 
+#include "uicomponents/uicomponent_mypersona.h"
+
 typedef CBaseModPanel UI_BASEMOD_PANEL_CLASS;
 inline UI_BASEMOD_PANEL_CLASS & GetUiBaseModPanelClass() { return *BasePanel(); }
 inline UI_BASEMOD_PANEL_CLASS & ConstructUiBaseModPanelClass() { return *BasePanelSingleton(); }
@@ -342,7 +344,7 @@ void CGameUI::Initialize( CreateInterfaceFn factory )
 
 #if defined( INCLUDE_SCALEFORM )
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_FriendsList::GetInstance());
-	//m_arrUiComponents.InsertBefore(0, CUiComponent_MyPersona::GetInstance());
+	m_arrUiComponents.InsertBefore(0, CUiComponent_MyPersona::GetInstance());
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_PartyList::GetInstance());
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_Store::GetInstance());
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_Inventory::GetInstance());
