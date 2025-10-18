@@ -1,6 +1,8 @@
 /* protobuf config.h for MSVC.  On other platforms, this is generated
  * automatically by autoheader / autoconf / configure. */
 
+#define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS
+
 /* the location of <hash_map> */
 #define HASH_MAP_H <hash_map>
 

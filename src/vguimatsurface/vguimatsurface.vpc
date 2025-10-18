@@ -15,7 +15,7 @@ $Configuration
 	{
 		$PreprocessorDefinitions		"$BASE;BENCHMARK;VGUIMATSURFACE_DLL_EXPORT;GAMEUI_EXPORTS;DONT_PROTECT_FILEIO_FUNCTIONS;PROTECTED_THINGS_ENABLE"
 		$PreprocessorDefinitions		"$BASE;fopen=dont_use_fopen" [$WINDOWS]
-		$PreprocessorDefinitions		"$BASE;ENABLE_CHROMEHTMLWINDOW"
+		// $PreprocessorDefinitions		"$BASE;ENABLE_CHROMEHTMLWINDOW"
 //		$TreatWchar_tAsBuiltinType		"No"
 	}
 
@@ -34,7 +34,7 @@ $Configuration "Debug"
 {
 	$Linker [$WINDOWS]
 	{
-		$AdditionalDependencies			"$BASE $SRCDIR\lib\win32\debug\libcef.lib"
+		// $AdditionalDependencies			"$BASE $SRCDIR\lib\win32\debug\libcef.lib"
 	}
 }
 
@@ -42,7 +42,7 @@ $Configuration "Release"
 {
 	$Linker [$WINDOWS]
 	{
-		$AdditionalDependencies			"$BASE $SRCDIR\lib\win32\release\libcef.lib"
+		// $AdditionalDependencies			"$BASE $SRCDIR\lib\win32\release\libcef.lib"
 	}
 }
 
