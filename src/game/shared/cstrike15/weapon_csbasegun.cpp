@@ -631,11 +631,9 @@ void CWeaponCSBaseGun::BurstFireRemaining()
 		return;
 	}
 
-	uint16 nItemDefIndex = 0;
-
 	FX_FireBullets(
 		pPlayer->entindex(),
-		nItemDefIndex,
+		GetEconItemView()->GetItemIndex(),
 		pPlayer->Weapon_ShootPosition(),
 		pPlayer->GetFinalAimAngle(),
 		GetCSWeaponID(),
@@ -728,11 +726,9 @@ bool CWeaponCSBaseGun::CSBaseGunFire( float flCycleTime, CSWeaponMode weaponMode
 	// player "shoot" animation
 	pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-	uint16 nItemDefIndex = 0;
-
 	FX_FireBullets(
 		pPlayer->entindex(),
-		nItemDefIndex,
+		GetEconItemView()->GetItemIndex(),
 		pPlayer->Weapon_ShootPosition(),
 		pPlayer->GetFinalAimAngle(),
 		GetCSWeaponID(),
