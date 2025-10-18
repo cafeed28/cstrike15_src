@@ -1,0 +1,49 @@
+# Visual Studio 
+*.suo
+*.user
+*.sln.docstates
+*.obj
+*.pch
+*.tlog
+*.log
+*.scc
+*.exp
+*.ilk
+*.lastbuildstate
+vc100.pdb
+vc120.pdb
+ipch
+*.sdf
+*.opensdf
+*.idb
+*.vcxproj
+*.vcxproj.*
+*.sln
+*.res
+.vs/
+.vscode/
+Release*/
+Debug*/
+
+# VPC
+*.vpc.sentinel
+*.vpc_cache
+*.vpc_crc
+
+# OSX/Linux build products
+*.mak
+!src/devtools/*.mak
+!*valve_osx_libs.mak
+!utils/smdlexp/smdlexp.mak
+*.xcodeproj/
+!**/vpc.xcodeproj/
+*.project
+obj*/
+
+# Protobuf
+*/generated_proto/
+*.pb.cc
+*.pb.h
+
+# VScript Squirell generated files
+init_nut.h
