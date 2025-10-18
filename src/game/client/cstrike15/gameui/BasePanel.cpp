@@ -5800,23 +5800,23 @@ CON_COMMAND( hide_main_menu, "Hide the main menu" )
 // -----------------------------------------------------------------------------
 // Purpose: Console command to show the main menu
 // -----------------------------------------------------------------------------
-// CON_COMMAND( show_sf_main_menu, "Show the Scaleform main menu" )
-// {
-// 	BasePanel()->EnableScaleformMainMenu( true );
-// 	BasePanel()->ShowMainMenu( false );
-// 	BasePanel()->OnOpenCreateMainMenuScreen();
-// }
-// 
-// 
+CON_COMMAND( show_sf_main_menu, "Show the Scaleform main menu" )
+{
+	BasePanel()->EnableScaleformMainMenu( true );
+	BasePanel()->ShowMainMenu( false );
+	BasePanel()->OnOpenCreateMainMenuScreen();
+}
+
+
 // -----------------------------------------------------------------------------
 // Purpose: Console command to hide the main menu
 // -----------------------------------------------------------------------------
-// CON_COMMAND( hide_sf_main_menu, "Hide the Scaleform main menu" )
-// {
-// 	BasePanel()->EnableScaleformMainMenu( false );
-// 	BasePanel()->DismissMainMenuScreen();
-// 	BasePanel()->ShowMainMenu( true );
-// }
+CON_COMMAND( hide_sf_main_menu, "Hide the Scaleform main menu" )
+{
+	BasePanel()->EnableScaleformMainMenu( false );
+	BasePanel()->DismissMainMenuScreen();
+	BasePanel()->ShowMainMenu( true );
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Show or hide the main menu
