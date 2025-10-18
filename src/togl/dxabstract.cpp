@@ -5281,7 +5281,8 @@ HRESULT IDirect3DDevice9::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType,UINT Pr
 #include "glmgr_flush.inl"
 
 // BE VERY CAREFUL what you do in this function. It's extremely hot, and calling the wrong GL API's in here will crush perf. on NVidia threaded drivers.
-#ifndef OSX
+// #ifndef OSX
+#if 1
 HRESULT IDirect3DDevice9::DrawIndexedPrimitive( D3DPRIMITIVETYPE Type, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT startIndex, UINT primCount )
 {
 	tmZone( TELEMETRY_LEVEL2, TMZF_NONE, "%s", __FUNCTION__ );

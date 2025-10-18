@@ -32,8 +32,6 @@ $Configuration
 {
 	$Compiler
 	{
-		$PreprocessorDefinitions		"$BASE"							[$OSXALL]				
-
 		$PreprocessorDefinitions		"$BASE;AVI_VIDEO;WMV_VIDEO"										[ ( $WINDOWS && !$QUICKTIME_WINDOWS ) || $X360 || $PS3 ]
 		$PreprocessorDefinitions		"$BASE;AVI_VIDEO;WMV_VIDEO;QUICKTIME_VIDEO;FORCE_QUICKTIME"		[   $WINDOWS &&  $QUICKTIME_WINDOWS ]
 

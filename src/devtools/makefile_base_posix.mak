@@ -217,7 +217,7 @@ ifeq ($(OS),Linux)
 		# fails due to memory exhaustion.
 		CFLAGS += -g0
 	endif
-	CCACHE := $(SRCROOT)/devtools/bin/linux/ccache
+	# CCACHE := $(SRCROOT)/devtools/bin/linux/ccache
 
 	ifeq ($(origin GCC_VER), undefined)
 	GCC_VER=-4.6
@@ -297,7 +297,7 @@ ifeq ($(OS),Darwin)
 	LDFLAGS += -stdlib=libc++
 
 	OSXVER := $(shell sw_vers -productVersion)
-	CCACHE := $(SRCROOT)/devtools/bin/osx32/ccache
+	# CCACHE := $(SRCROOT)/devtools/bin/osx32/ccache
 	DEVELOPER_DIR := $(shell /usr/bin/xcode-select -print-path)
 	XCODEVER := $(shell /usr/bin/xcode-select -version)
 
@@ -318,7 +318,7 @@ ifeq ($(OS),Darwin)
                 SDK_DIR := $(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs
         endif
 
-	SDKROOT ?= $(SDK_DIR)/MacOSX10.9.sdk
+	SDKROOT ?= $(SDK_DIR)/MacOSX.sdk
 		
 
 	#test to see if you have a compiler in the right place, if you don't abort with an error

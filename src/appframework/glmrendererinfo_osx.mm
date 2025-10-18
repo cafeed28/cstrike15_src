@@ -893,8 +893,8 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						// gather more info from IOKit
 						// cribbed from http://developer.apple.com/mac/library/samplecode/VideoHardwareInfo/listing3.html
 						
-						CFTypeRef typeCode;
-						CFDataRef vendorID, deviceID, model;
+						CFDataRef vendorID, deviceID;
+						CFTypeRef model;
 						io_registry_entry_t dspPort;
 							
 						// Get the I/O Kit service port for the display
@@ -903,9 +903,9 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						// Get the information for the device
 						// The vendor ID, device ID, and model are all available as properties of the hardware's I/O Kit service port
 						
-						vendorID	= (CFDataRef)IORegistryEntrySearchCFProperty(dspPort,kIOServicePlane,CFSTR("vendor-id"),	kCFAllocatorDefault,kIORegistryIterateRecursively | kIORegistryIterateParents);
-						deviceID	= (CFDataRef)IORegistryEntrySearchCFProperty(dspPort,kIOServicePlane,CFSTR("device-id"),	kCFAllocatorDefault,kIORegistryIterateRecursively | kIORegistryIterateParents);
-						model		= (CFDataRef)IORegistryEntrySearchCFProperty(dspPort,kIOServicePlane,CFSTR("model"),		kCFAllocatorDefault,kIORegistryIterateRecursively | kIORegistryIterateParents);
+						vendorID = (CFDataRef)IORegistryEntrySearchCFProperty(dspPort,kIOServicePlane,CFSTR("vendor-id"),	kCFAllocatorDefault,kIORegistryIterateRecursively | kIORegistryIterateParents);
+						deviceID = (CFDataRef)IORegistryEntrySearchCFProperty(dspPort,kIOServicePlane,CFSTR("device-id"),	kCFAllocatorDefault,kIORegistryIterateRecursively | kIORegistryIterateParents);
+						model =               IORegistryEntrySearchCFProperty(dspPort,kIOServicePlane,CFSTR("model"),		kCFAllocatorDefault,kIORegistryIterateRecursively | kIORegistryIterateParents);
 						
 						// Send the appropriate data to the outputs checking to validate the data
 						if(vendorID)
@@ -928,8 +928,21 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						
 						if(model)
 						{
-							int length = CFDataGetLength(model);
-							char *data = (char*)CFDataGetBytePtr(model);
+							CFTypeID type = CFGetTypeID(model);
+							const char *data = nullptr;
+							if (type == CFStringGetTypeID())
+							{
+								data = CFStringGetCStringPtr((CFStringRef)model, CFStringGetSystemEncoding());
+							}
+							else if (type == CFDataGetTypeID())
+							{
+								data = (const char*)CFDataGetBytePtr((CFDataRef)model);
+							}
+							else
+							{
+								// TODO: wtf
+							}
+
 							Q_strncpy( fields.m_pciModelString, data, sizeof(fields.m_pciModelString) );
 						}
 						else
@@ -1161,7 +1174,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 						}
 					}
 					
-					if (selected)
+					/* if (selected)
 					{
 						// criteria check
 						if (fields.m_fullscreen==0)
@@ -1170,7 +1183,7 @@ void	GLMDisplayDB::PopulateRenderers( void )
 							selected = false;
 						if (fields.m_windowed==0)
 							selected = false;
-					}
+					} */
 
 					Assert( fields.m_displayMask != 0 );
 					

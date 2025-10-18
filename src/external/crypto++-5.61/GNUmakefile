@@ -60,8 +60,6 @@ else
 endif
 endif 
 
-ifeq ($(ISX86),1)
-
 GCC42_OR_LATER = $(shell $(CXX) -v 2>&1 | $(EGREP) -c "^gcc version (4.[2-9]|[5-9])")
 INTEL_COMPILER = $(shell $(CXX) --version 2>&1 | $(EGREP) -c "\(ICC\)")
 ICC111_OR_LATER = $(shell $(CXX) --version 2>&1 | $(EGREP) -c "\(ICC\) ([2-9][0-9]|1[2-9]|11\.[1-9])")
@@ -70,6 +68,8 @@ GAS210_OR_LATER = $(shell echo "" | $(AS) -v 2>&1 | $(EGREP) -c "GNU assembler v
 GAS217_OR_LATER = $(shell echo "" | $(AS) -v 2>&1 | $(EGREP) -c "GNU assembler version (2\.1[7-9]|2\.[2-9]|[3-9])")
 GAS219_OR_LATER = $(shell echo "" | $(AS) -v 2>&1 | $(EGREP) -c "GNU assembler version (2\.19|2\.[2-9]|[3-9])")
 ISMINGW = $(shell $(CXX) --version 2>&1 | $(EGREP) -c "mingw")
+
+ifeq ($(ISX86),1)
 
 ifneq ($(GCC42_OR_LATER),0)
 ifeq ($(UNAME),Darwin)
@@ -130,11 +130,8 @@ ifeq ($(UNAME),Darwin)
 AR = libtool
 ARFLAGS = -static -o
 # VALVE: Mac build compatibility
-#CXX = c++
-CXX = g++-4.2
-CXXFLAGS += -arch x86_64 -arch i386
-CXXFLAGS += -mmacosx-version-min=10.5
-CXXFLAGS += -isysroot /Developer/SDKs/MacOSX10.5.sdk
+CXX = c++
+CXXFLAGS += -arch x86_64
 BINDIR = osx32
 IS_GCC2 = $(shell $(CXX) -v 2>&1 | $(EGREP) -c gcc-932)
 ifeq ($(IS_GCC2),1)

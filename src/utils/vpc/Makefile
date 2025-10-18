@@ -201,7 +201,7 @@ endif
 ifeq "$(OS)" "Darwin"
 CFLAGS+=-I/usr/include/malloc 
 CFLAGS+= -DOSX -D_OSX
-CFLAGS+= -arch i386 -fasm-blocks
+CFLAGS+= -arch x86_64 -fasm-blocks
 endif
 
 ifeq "$(OS)" "Linux"
@@ -225,7 +225,7 @@ LINK+=-liconv -framework Foundation
 endif
 
 ifeq "$(OS)" "Darwin"
-LINK+= -arch i386
+LINK+= -arch x86_64
 endif
 
 

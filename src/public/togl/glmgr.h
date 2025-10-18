@@ -1430,7 +1430,8 @@ class GLMContext
 		void FlushDrawStatesNoShaders();
 				
 		// drawing
-#ifndef OSX
+// #ifndef OSX
+#if 1
 		FORCEINLINE void DrawRangeElements(	GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices, uint baseVertex, CGLMBuffer *pIndexBuf );
 		void DrawRangeElementsNonInline(	GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices, uint baseVertex, CGLMBuffer *pIndexBuf );
 #else
@@ -1773,6 +1774,10 @@ class GLMContext
 		CGLMProgram						*m_preload3DTexFragmentProgram;
 		CGLMProgram						*m_preloadCubeTexFragmentProgram;
 
+#if defined( OSX ) && defined( GLMDEBUG )
+		CGLMProgram						*m_boundProgram[ kGLMNumProgramTypes ];
+#endif
+
 		CGLMShaderPairCache				*m_pairCache;				// GLSL only
 		CGLMShaderPair					*m_pBoundPair;				// GLSL only
 
@@ -1883,7 +1888,8 @@ class GLMContext
 	CTSQueue<CGLMTex*> m_DeleteTextureQueue;
 };
 
-#ifndef OSX
+// #ifndef OSX
+#if 1
 FORCEINLINE void GLMContext::DrawRangeElements(	GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices, uint baseVertex, CGLMBuffer *pIndexBuf )
 {
 #if GL_ENABLE_INDEX_VERIFICATION
