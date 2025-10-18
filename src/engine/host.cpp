@@ -5689,6 +5689,11 @@ void Host_Init( bool bDedicated )
 #endif
 	}
 
+#ifdef _DEBUG
+	// Always enable FCVAR_DEVELOPMENTONLY cvars if built in debug
+	// in case there is some release binaries that have FCVAR_DEVELOPMENTONLY cvars
+	ConVarUtilities->EnableDevCvars();
+#else
 	if ( IsPC() )
 	{
 #if !defined(NO_STEAM)
@@ -5697,7 +5702,7 @@ void Host_Init( bool bDedicated )
 		if ( ( eUniverse == k_EUniverseBeta ) || ( eUniverse == k_EUniverseDev ) )
 		{
 			ConVarUtilities->EnableDevCvars();
-		}		
+		}
 #endif 
 	}
 	else if ( IsGameConsole() )
@@ -5705,6 +5710,7 @@ void Host_Init( bool bDedicated )
 		// on 360, enable FCVAR_DEVELOPMENTONLY cvars always.  No cvars are accessible to customers on X360.
 		ConVarUtilities->EnableDevCvars();
 	}
+#endif
 
 #ifndef DEDICATED
 	memset( g_bConfigCfgExecuted, 0, sizeof(g_bConfigCfgExecuted) );
