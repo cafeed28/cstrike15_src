@@ -46,3 +46,4 @@ private:
 };
 
 bool Helper_CanUseSprays();
+const char* Helper_GetMouseEnableBindingName();

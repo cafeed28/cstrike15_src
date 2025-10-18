@@ -33,6 +33,30 @@ bool Helper_CanUseSprays( void )
 	return pLocalPlayer->IsAlive() && ( pLocalPlayer->GetTeamNumber() == TEAM_TERRORIST || pLocalPlayer->GetTeamNumber() == TEAM_CT );
 }
 
+const char* Helper_GetMouseEnableBindingName()
+{
+	extern ConVar cl_scoreboard_mouse_enable_binding;
+
+	const char* szBinding = cl_scoreboard_mouse_enable_binding.GetString();
+
+	if (!V_stricmp(szBinding, "+attack2"))
+		return "#SFUI_WeaponSpecial";
+	if (!V_stricmp(szBinding, "+jump"))
+		return "#SFUI_Jump";
+	if (!V_stricmp(szBinding, "+duck"))
+		return "#SFUI_Duck";
+	if (!V_stricmp(szBinding, "drop"))
+		return "#SFUI_Drop_Weapon";
+	if (!V_stricmp(szBinding, "lastinv"))
+		return "#SFUI_Previous";
+	if (!V_stricmp(szBinding, "radio1"))
+		return "#SFUI_CommandRadio";
+	if (!V_stricmp(szBinding, "+use"))
+		return "#SFUI_Pickup_Use_Objects";
+
+	return szBinding;
+}
+
 void ShowSprayMenu( const CCommand &args )
 {
 	if ( Helper_CanUseSprays() )
@@ -136,7 +160,7 @@ void SFHudRosettaSelector::FlashHide( SCALEFORM_CALLBACK_ARGS_DECL )
 
 void SFHudRosettaSelector::GetMouseEnableBindingName( SCALEFORM_CALLBACK_ARGS_DECL )
 {
-	/* Removed for partner depot */
+	pui->Params_SetResult(obj, Helper_GetMouseEnableBindingName());
 }
 
 void SFHudRosettaSelector::LevelInit( void )
