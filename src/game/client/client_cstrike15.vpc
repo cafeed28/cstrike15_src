@@ -624,6 +624,8 @@ $Project "Client (CSGO)"
 				$File	"cstrike15\uicomponents\uicomponent_common.h"
 				$File	"cstrike15\uicomponents\uicomponent_mypersona.cpp"
 				$File	"cstrike15\uicomponents\uicomponent_mypersona.h"
+				$File	"cstrike15\uicomponents\uicomponent_friendslist.cpp"
+				$File	"cstrike15\uicomponents\uicomponent_friendslist.h"
 			}
 
 			$Folder	"vgui"
