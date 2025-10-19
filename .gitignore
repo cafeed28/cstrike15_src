@@ -1,3 +1,11 @@
+game/
+
+# VPC
+*.vpc.sentinel
+*.vpc_cache
+*.vpc_crc
+**/_vpc_/
+
 # Visual Studio 
 *.suo
 *.user
@@ -25,12 +33,7 @@ ipch
 Release*/
 Debug*/
 
-# VPC
-*.vpc.sentinel
-*.vpc_cache
-*.vpc_crc
-
-# OSX/Linux build products
+# OSX/Linux
 *.mak
 !src/devtools/*.mak
 !*valve_osx_libs.mak
@@ -47,3 +50,87 @@ obj*/
 
 # VScript Squirell generated files
 init_nut.h
+
+# Ignore libraries that must be built by the programmer
+src/lib/common/bzip2.lib
+src/lib/common/bzip2.pdb
+src/lib/common/mxtoolkitwin32.lib
+src/lib/common/mxtoolkitwin32.pdb
+src/lib/public/appframework.lib
+src/lib/public/appframework.pdb
+src/lib/public/bitmap.lib
+src/lib/public/bitmap.pdb
+src/lib/public/bitmap_byteswap.lib
+src/lib/public/bitmap_byteswap.pdb
+src/lib/public/bonesetup.lib
+src/lib/public/bonesetup.pdb
+src/lib/public/choreoobjects.lib
+src/lib/public/choreoobjects.pdb
+src/lib/public/datamodel.lib
+src/lib/public/datamodel.pdb
+src/lib/public/dme_controls.lib
+src/lib/public/dme_controls.pdb
+src/lib/public/dmserializers.lib
+src/lib/public/dmserializers.pdb
+src/lib/public/dmxloader.lib
+src/lib/public/dmxloader.pdb
+src/lib/public/fgdlib.lib
+src/lib/public/fgdlib.pdb
+src/lib/public/fow.lib
+src/lib/public/game_controls.lib
+src/lib/public/game_controls.pdb
+src/lib/public/interfaces.lib
+src/lib/public/interfaces.pdb
+src/lib/public/matchmakingbase.lib
+src/lib/public/matchmakingbase.pdb
+src/lib/public/matchmakingbase_ds.lib
+src/lib/public/matchmakingbase_ds.pdb
+src/lib/public/materialobjects.lib
+src/lib/public/materialobjects.pdb
+src/lib/public/mathlib.lib
+src/lib/public/mathlib.pdb
+src/lib/public/mathlib_extended.lib
+src/lib/public/mathlib_extended.pdb
+src/lib/public/matsys_controls.lib
+src/lib/public/matsys_controls.pdb
+src/lib/public/mdlobjects.lib
+src/lib/public/mdlobjects.pdb
+src/lib/public/meshutils.lib
+src/lib/public/meshutils.pdb
+src/lib/public/movieobjects.lib
+src/lib/public/movieobjects.pdb
+src/lib/public/particles.lib
+src/lib/public/particles.pdb
+src/lib/public/quickhull.lib
+src/lib/public/quickhull.pdb
+src/lib/public/raytrace.lib
+src/lib/public/raytrace.pdb
+src/lib/public/resourcefile.lib
+src/lib/public/resourcefile.pdb
+src/lib/public/responserules_runtime.lib
+src/lib/public/responserules_runtime.pdb
+src/lib/public/shaderlib.lib
+src/lib/public/shaderlib.pdb
+src/lib/public/soundsystem_lowlevel.lib
+src/lib/public/soundsystem_lowlevel.pdb
+src/lib/public/tier0.lib
+src/lib/public/tier1.lib
+src/lib/public/tier1.pdb
+src/lib/public/tier2.lib
+src/lib/public/tier2.pdb
+src/lib/public/tier3.lib
+src/lib/public/tier3.pdb
+src/lib/public/toolutils.lib
+src/lib/public/toolutils.pdb
+src/lib/public/unitlib.lib
+src/lib/public/vgui_controls.lib
+src/lib/public/vgui_controls.pdb
+src/lib/public/vgui_surfacelib.lib
+src/lib/public/vgui_surfacelib.pdb
+src/lib/public/videocfg.lib
+src/lib/public/videocfg.pdb
+src/lib/public/vpklib.lib
+src/lib/public/vpklib.pdb
+src/lib/public/vstdlib.lib
+src/lib/public/vtf.lib
+src/lib/public/vtf.pdb
