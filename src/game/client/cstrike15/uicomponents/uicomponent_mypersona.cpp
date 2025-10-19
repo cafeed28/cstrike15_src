@@ -48,6 +48,42 @@ SF_COMPONENT_FUNCTION_IMPL(CUiComponent_MyPersona, IsVacBanned)
 	pui->Params_SetResult(obj, 0);
 }
 
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, ActionAcknowledgeNotifications)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, ActionClientAuthKeyCode)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, ActionElevate)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetActiveXpBonuses)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetClientAuthKeyCode)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetCommendations)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetCompetitiveRank)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetCompetitiveWins)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetCurrentLevel)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetCurrentXp)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetElevatedState)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetElevatedTime)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetFriendCode)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetLauncherType)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetLicenseType)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyClanCount)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyClanIdByIndex)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyClanNameById)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyClanTagById)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyClanUsersById)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyDisplayItemDefByIndex)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyDisplayItemDefCount)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyDisplayItemDefFeatured)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyMedalAdditionalInfo)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyMedalRankByType)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyNotifications)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyOfficialTeamFlag)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyOfficialTeamID)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyOfficialTeamName)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyOfficialTeamTag)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetMyOfficialTournamentName)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetTimePlayedConsecutively)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, GetXpPerLevel)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, HasPrestige)
+SF_COMPONENT_FUNCTION_TODO(CUiComponent_MyPersona, IsInventoryValid)
+
 CSteamID CUiComponent_MyPersona::s_steamIdMyself;
 
 CUiComponent_MyPersona::CUiComponent_MyPersona()
@@ -56,12 +92,8 @@ CUiComponent_MyPersona::CUiComponent_MyPersona()
 
 	s_steamIdMyself = steamapicontext->SteamUser()->GetSteamID();
 }
-CUiComponent_MyPersona::~CUiComponent_MyPersona()
-{
-	DevMsg(__FUNCTION__ "\n");
-}
 
-void CUiComponent_MyPersona::RequestAccountPrivacySettings()
+CUiComponent_MyPersona::~CUiComponent_MyPersona()
 {
 	DevMsg(__FUNCTION__ "\n");
 }

@@ -1493,4 +1493,6 @@ typedef ScaleformFlashInterfaceMixin<ScaleformEmptyClass> ScaleformFlashInterfac
 
 #define SFUI_CALLBACK_TODO(name) void name(SCALEFORM_CALLBACK_ARGS_DECL) { Warning(" !!! TODO: implement " #name "\n"); }
 
+#define FIF_RE_TODO(name) inline void name() { Warning(" !!! TODO: implement " __FUNCTION__ "\n"); }
+
 #endif
