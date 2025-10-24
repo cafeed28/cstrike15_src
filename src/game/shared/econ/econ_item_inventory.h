@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======
+//====== Copyright ï¿½ 1996-2005, Valve Corporation, All rights reserved. =======
 //
 // Purpose: Container that allows client & server access to data in player inventories & loadouts
 //
@@ -39,11 +39,13 @@ class IInventoryUpdateListener : public GCSDK::ISharedObjectListener
 {
 public:
 	virtual void InventoryUpdated( CPlayerInventory *pInventory ) = 0;
-	virtual void SOCreated( GCSDK::SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
-	virtual void SOUpdated( GCSDK::SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
-	virtual void SODestroyed( GCSDK::SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
-	virtual void SOCacheSubscribed( GCSDK::SOID_t owner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
-	virtual void SOCacheUnsubscribed( GCSDK::SOID_t owner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
+	virtual void SOCreated( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
+	virtual void PreSOUpdate( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { /* do nothing */ }
+	virtual void SOUpdated( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
+	virtual void PostSOUpdate( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
+	virtual void SODestroyed( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
+	virtual void SOCacheSubscribed( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
+	virtual void SOCacheUnsubscribed( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { InventoryUpdated( NULL ); }
 };
 
 //-----------------------------------------------------------------------------
@@ -65,8 +67,8 @@ public:
 	bool	InventorySubscribedToSteamCurrently( void ) const { return m_bCurrentlySubscribedToSteam; }
 
 	// Inventory access
-	GCSDK::SOID_t				GetOwner( void ) { return m_OwnerID; }
-	void						SetOwner( GCSDK::SOID_t& ownerID ) { m_OwnerID = ownerID; }
+	CSteamID			&GetOwner( void ) { return m_OwnerID; }
+	void				SetOwner( const CSteamID & steamIDOwner ) { m_OwnerID = steamIDOwner; }
 	int					GetItemCount( void ) const { return m_Items.GetItemVector().Count(); }
 	int					GetDefaultEquippedDefinitionItemsCount( void ) const { return m_aDefaultEquippedDefinitionItems.Count(); }
 	virtual bool		CanPurchaseItems( int iItemCount ) const { return GetMaxItemCount() - GetItemCount() >= iItemCount; }
@@ -159,7 +161,7 @@ public:
 protected:
 	// Inventory updating, called by the Inventory Manager only. If you want an inventory updated,
 	// use the SteamRequestX functions in CInventoryManager.
-	void				RequestInventory( GCSDK::SOID_t ID );
+	void				RequestInventory( CSteamID pSteamID );
 	void				AddListener( GCSDK::ISharedObjectListener *pListener );
 	virtual void		RemoveItem( itemid_t iItemID );
 	bool				AddEconDefaultEquippedDefinition( CEconDefaultEquippedDefinitionInstanceClient *pDefaultEquippedDefinition );
@@ -168,11 +170,13 @@ protected:
 	virtual void		OnHasNewItems() {}
 	virtual void		OnItemChangedPosition( CEconItemView *pItem, uint32 iOldPos ) { return; }
 
-	virtual void		SOCreated( GCSDK::SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
-	virtual void		SOUpdated( GCSDK::SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
-	virtual void		SODestroyed( GCSDK::SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
-	virtual void		SOCacheSubscribed( GCSDK::SOID_t owner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
-	virtual void		SOCacheUnsubscribed( GCSDK::SOID_t owner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
+	virtual void		SOCreated( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
+	virtual void		PreSOUpdate( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { /* do nothing */ }
+	virtual void		SOUpdated( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
+	virtual void		PostSOUpdate( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE { /* do nothing */ }
+	virtual void		SODestroyed( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
+	virtual void		SOCacheSubscribed( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
+	virtual void		SOCacheUnsubscribed( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent ) OVERRIDE;
 
 	virtual void		ValidateInventoryPositions( void );
 
@@ -192,7 +196,7 @@ protected:
 
 protected:
 	// The SharedObject Id of the player who owns this inventory
-	GCSDK::SOID_t m_OwnerID;
+	CSteamID m_OwnerID;
 
 	CUtlVector< CEconItemView*> m_aDefaultEquippedDefinitionItems;
 

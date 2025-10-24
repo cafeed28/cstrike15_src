@@ -79,6 +79,8 @@ src/lib/public/fgdlib.pdb
 src/lib/public/fow.lib
 src/lib/public/game_controls.lib
 src/lib/public/game_controls.pdb
+src/lib/public/gcsdk.lib
+src/lib/public/gcsdk.pdb
 src/lib/public/interfaces.lib
 src/lib/public/interfaces.pdb
 src/lib/public/matchmakingbase.lib

@@ -1,4 +1,4 @@
-//=========== (C) Copyright 2000 Valve, L.L.C. All rights reserved. ===========
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // The copyright to the contents herein is the property of Valve, L.L.C.
 // The contents may be used and/or copied only with the written permission of
@@ -94,6 +94,10 @@ public:
 			);
 	}
 		
+#ifdef DBGFLAG_VALIDATE
+	void Validate( CValidator &validator, const char *pchName );		// Validate our internal structures
+#endif // DBGFLAG_VALIDATE
+
 private:
 	// These ain't gonna work
 	static void * operator new[] ( size_t size );

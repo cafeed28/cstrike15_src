@@ -997,7 +997,7 @@ CEconItem *CEconItemView::GetSOCData( void ) const
 	// We need to find the inventory that contains this item. If we're not connected 
 	// to a server, and the owner is the same as the local player, use the local inventory.
 	// We need to do this for trading, since we are subscribed to the other person's cache.
-	if ( !engine->IsInGame() && GetSteamIDFromSOID( InventoryManager()->GetLocalInventory()->GetOwner() ).GetAccountID() == m_iAccountID )
+	if ( !engine->IsInGame() && InventoryManager()->GetLocalInventory()->GetOwner().GetAccountID() == m_iAccountID )
 		return InventoryManager()->GetLocalInventory()->GetSOCDataForItem( GetItemID() );
 #endif // CLIENT_DLL
 

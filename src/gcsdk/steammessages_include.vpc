@@ -8,6 +8,16 @@ $Project
 		$Folder "Generated Files"
 		{
 			$DynamicFile "$GENERATED_PROTO_DIR/steammessages.pb.h"
+			$DynamicFile "$GENERATED_PROTO_DIR/steammessages.pb.cc"
+			{
+				$Configuration
+				{
+					$Compiler 
+					{
+						$Create/UsePrecompiledHeader	"Not Using Precompiled Headers" [$WINDOWS]
+					}
+				}
+			}
 		}
 	}
 }

@@ -96,7 +96,7 @@ struct CaseSensitiveStrEquals
 //
 //-----------------------------------------------------------------------------
 template <typename K, typename T, typename L = CDefEquals<K>, typename H = MurmurHash3Functor<K> > 
-class CUtlHashMapLarge : public base_utlmap_t
+class CUtlHashMapLarge
 {
 public:
 	// This enum exists so that FOR_EACH_MAP and FOR_EACH_MAP_FAST cannot accidentally

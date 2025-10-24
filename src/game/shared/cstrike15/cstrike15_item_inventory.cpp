@@ -982,11 +982,10 @@ static void Helper_NotifyMyPersonaInventoryUpdated( const CSteamID &steamIDOwner
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CCSPlayerInventory::SOCreated( GCSDK::SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
+void CCSPlayerInventory::SOCreated( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
 {
-	BaseClass::SOCreated( owner, pObject, eEvent );
+	BaseClass::SOCreated( steamIDOwner, pObject, eEvent );
 
-	CSteamID steamIDOwner( owner.ID() );
 	Helper_NotifyMyPersonaInventoryUpdated( steamIDOwner );
 
 	if ( pObject->GetTypeID() == CEconItem::k_nTypeID )
@@ -1008,11 +1007,10 @@ void CCSPlayerInventory::SOCreated( GCSDK::SOID_t owner, const GCSDK::CSharedObj
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CCSPlayerInventory::SODestroyed( GCSDK::SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
+void CCSPlayerInventory::SODestroyed( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
 {
-	BaseClass::SODestroyed( owner, pObject, eEvent );
+	BaseClass::SODestroyed( steamIDOwner, pObject, eEvent );
 
-	CSteamID steamIDOwner( owner.ID() );
 	Helper_NotifyMyPersonaInventoryUpdated( steamIDOwner );
 
 	if ( pObject->GetTypeID() == CEconItem::k_nTypeID )
@@ -1034,11 +1032,10 @@ void CCSPlayerInventory::SODestroyed( GCSDK::SOID_t owner, const GCSDK::CSharedO
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CCSPlayerInventory::SOUpdated( GCSDK::SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
+void CCSPlayerInventory::SOUpdated( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
 {
-	BaseClass::SOUpdated( owner, pObject, eEvent );
+	BaseClass::SOUpdated( steamIDOwner, pObject, eEvent );
 
-	CSteamID steamIDOwner( owner.ID() );
 	Helper_NotifyMyPersonaInventoryUpdated( steamIDOwner );
 
 	if ( pObject->GetTypeID() == CEconItem::k_nTypeID )
@@ -1362,9 +1359,9 @@ void CCSPlayerInventory::ValidateInventoryPositions( void )
 #endif
 }
 
-void CCSPlayerInventory::SOCacheSubscribed( GCSDK::SOID_t owner, GCSDK::ESOCacheEvent eEvent )
+void CCSPlayerInventory::SOCacheSubscribed( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent )
 {
-	BaseClass::SOCacheSubscribed( owner, eEvent );
+	BaseClass::SOCacheSubscribed( steamIDOwner, eEvent );
 }
 
 #ifdef CLIENT_DLL
@@ -1403,7 +1400,7 @@ void CCSPlayerInventory::DumpInventoryToConsole( bool bRoot )
 #ifdef CLIENT_DLL
 		Msg("(CLIENT) Inventory:\n");
 #else
-		Msg("(SERVER) Inventory for account (%d):\n", CSteamID( m_OwnerID.ID() ).GetAccountID() );
+		Msg("(SERVER) Inventory for account (%d):\n", m_OwnerID.GetAccountID() );
 #endif
 		Msg("  Version: %llu:\n", m_pSOCache ? m_pSOCache->GetVersion() : -1 );
 	}
@@ -1739,7 +1736,7 @@ void CCSPlayerInventory::ItemHasBeenUpdated( CEconItemView *pItem, bool bUpdateA
 
 #ifdef CLIENT_DLL
 	// Assert that this item belongs to this inventory and store the mapping to owner
-	CSteamID owner( this->GetOwner().ID() );
+	CSteamID owner( this->GetOwner() );
 	Assert( pItem->GetAccountID() == owner.GetAccountID() );
 	g_ScaleformInventoryImageProviderImpl.m_mapItems2Owners.InsertOrReplace( pItem->GetItemID(), owner.ConvertToUint64() );
 

@@ -1010,6 +1010,7 @@ bool CEconItem::BUpdateFromNetwork( const CSharedObject & objUpdate )
 	return true;
 }
 
+#ifdef GC
 //----------------------------------------------------------------------------
 // Purpose: Adds the relevant bits to update this object to the message. This
 //			must include any relevant information about which fields are being
@@ -1037,6 +1038,7 @@ bool CEconItem::BAddDestroyToMessage( std::string *pBuffer ) const
 	msgItem.set_id( GetItemID() );
 	return msgItem.SerializeToString( pBuffer );
 }
+#endif
 
 //----------------------------------------------------------------------------
 // Purpose: Returns true if this is less than than the object in soRHS. This

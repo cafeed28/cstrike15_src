@@ -476,8 +476,10 @@ public:
 	virtual bool BParseFromMessage( const std::string &buffer ) OVERRIDE;
 	virtual bool BUpdateFromNetwork( const CSharedObject & objUpdate ) OVERRIDE;
 
+#ifdef GC
 	virtual bool BAddToMessage( std::string *pBuffer ) const OVERRIDE; // short cut to remove an extra copy
 	virtual bool BAddDestroyToMessage( std::string *pBuffer ) const OVERRIDE;
+#endif
 
 	virtual bool BIsKeyLess( const CSharedObject & soRHS ) const ;
 	virtual void Copy( const CSharedObject & soRHS );

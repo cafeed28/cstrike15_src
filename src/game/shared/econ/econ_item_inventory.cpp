@@ -197,8 +197,7 @@ void CInventoryManager::RegisterPlayerInventory( CPlayerInventory *pInventory, I
 
 		if ( pSteamID )
 		{
-			SOID_t ownerSOID = GetSOIDFromSteamID( *pSteamID );
-			pInventory->SetOwner( ownerSOID );
+			pInventory->SetOwner( *pSteamID );
 		}
 
 		if ( pListener )
@@ -237,7 +236,7 @@ CPlayerInventory *CInventoryManager::GetInventoryForAccount( uint32 iAccountID )
 	FOR_EACH_VEC( m_pInventories, i )
 	{
 		CPlayerInventory* pInventory = m_pInventories[i].pInventory;
-		if ( GetSteamIDFromSOID( pInventory->GetOwner() ).GetAccountID() == iAccountID )
+		if ( pInventory->GetOwner().GetAccountID() == iAccountID )
 			return m_pInventories[i].pInventory;
 	}
 	return NULL;
@@ -1193,15 +1192,15 @@ void CPlayerInventory::SOClear()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CPlayerInventory::RequestInventory( SOID_t ID )
+void CPlayerInventory::RequestInventory( CSteamID pSteamID )
 {
 	// Make sure we don't already have somebody else's stuff
 	// on hand
-	if ( m_OwnerID != ID )
+	if ( m_OwnerID != pSteamID )
 		SOClear();
 
 	// Remember whose inventory we're looking at
-	m_OwnerID = ID; 
+	m_OwnerID = pSteamID; 
 }
 
 void CPlayerInventory::AddListener( GCSDK::ISharedObjectListener *pListener )
@@ -1250,7 +1249,7 @@ bool CPlayerInventory::AddEconItem( CEconItem * pItem, bool bUpdateAckFile, bool
 	// Also insert the fact that this account owns an item of this defindex
 	CEconItemView::s_mapLookupByID.InsertOrReplace(
 			(1ull << 63)
-			| ( uint64( GetSteamIDFromSOID( GetOwner() ).GetAccountID() & 0x7FFFFFFF ) << 32 )
+			| ( uint64( GetOwner().GetAccountID() & 0x7FFFFFFF ) << 32 )
 			| pItem->GetDefinitionIndex(),
 			0ull
 		);
@@ -1305,13 +1304,13 @@ bool CPlayerInventory::AddEconDefaultEquippedDefinition( CEconDefaultEquippedDef
 //-----------------------------------------------------------------------------
 // Purpose: Creates a script item and associates it with this econ item
 //-----------------------------------------------------------------------------
-void CPlayerInventory::SOCreated( SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
+void CPlayerInventory::SOCreated( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
 {
 #ifdef _DEBUG
-	Msg("CPlayerInventory::SOCreated %s [event = %u]\n", CSteamID( owner.ID() ).Render(), eEvent );
+	Msg("CPlayerInventory::SOCreated %s [event = %u]\n", steamIDOwner.Render(), eEvent );
 #endif
 
-	if ( owner != m_OwnerID )
+	if ( steamIDOwner != m_OwnerID )
 		return;
 
 	// We shouldn't get these notifications unless we're subscribed, right?
@@ -1352,12 +1351,10 @@ void CPlayerInventory::SOCreated( SOID_t owner, const GCSDK::CSharedObject *pObj
 //-----------------------------------------------------------------------------
 // Purpose: Updates the script item associated with this econ item
 //-----------------------------------------------------------------------------
-void CPlayerInventory::SOUpdated( SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
+void CPlayerInventory::SOUpdated( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
 {
 #ifdef _DEBUG
 	{
-		CSteamID steamIDOwner( owner.ID() );
-
 		static CSteamID spewSteamID;
 		static GCSDK::ESOCacheEvent spewEvent;
 		static double spewTime = 0;
@@ -1375,7 +1372,7 @@ void CPlayerInventory::SOUpdated( SOID_t owner, const GCSDK::CSharedObject *pObj
 	}
 #endif
 
-	if ( owner != m_OwnerID )
+	if ( steamIDOwner != m_OwnerID )
 		return;
 
 	// We shouldn't get these notifications unless we're subscribed, right?
@@ -1475,15 +1472,15 @@ void CPlayerInventory::SOUpdated( SOID_t owner, const GCSDK::CSharedObject *pObj
 //-----------------------------------------------------------------------------
 // Purpose: Removes the script item associated with this econ item
 //-----------------------------------------------------------------------------
-void CPlayerInventory::SODestroyed( SOID_t owner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
+void CPlayerInventory::SODestroyed( const CSteamID & steamIDOwner, const GCSDK::CSharedObject *pObject, GCSDK::ESOCacheEvent eEvent )
 {
 #ifdef _DEBUG
-	Msg("CPlayerInventory::SODestroyed %s [event = %u]\n", CSteamID( owner.ID() ).Render(), eEvent );
+	Msg("CPlayerInventory::SODestroyed %s [event = %u]\n", steamIDOwner.Render(), eEvent );
 #endif
 
 	if( pObject->GetTypeID() != CEconItem::k_nTypeID )
 		return;
-	if ( owner != m_OwnerID )
+	if ( steamIDOwner != m_OwnerID )
 		return;
 
 	// We shouldn't get these notifications unless we're subscribed, right?
@@ -1516,7 +1513,7 @@ void CPlayerInventory::SODestroyed( SOID_t owner, const GCSDK::CSharedObject *pO
 // Purpose: This is our initial notification that this cache has been received
 //			from the server.
 //-----------------------------------------------------------------------------
-void CPlayerInventory::SOCacheSubscribed( SOID_t owner, GCSDK::ESOCacheEvent eEvent )
+void CPlayerInventory::SOCacheSubscribed( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent )
 {
 	/** Removed for partner depot **/
 	return;
@@ -1589,13 +1586,13 @@ void CPlayerInventory::MarkSetItemDescriptionsDirty( int nItemSetIndex )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-void CPlayerInventory::SOCacheUnsubscribed( GCSDK::SOID_t ID, GCSDK::ESOCacheEvent eEvent )
+void CPlayerInventory::SOCacheUnsubscribed( const CSteamID & steamIDOwner, GCSDK::ESOCacheEvent eEvent )
 {
 #ifdef _DEBUG
-	Msg("CPlayerInventory::SOCacheUnsubscribed %s [event = %u]\n", CSteamID( ID.ID() ).Render(), eEvent );
+	Msg("CPlayerInventory::SOCacheUnsubscribed %s [event = %u]\n", steamIDOwner.Render(), eEvent );
 #endif
 
-	if ( ID != m_OwnerID )
+	if ( steamIDOwner != m_OwnerID )
 		return;
 
 	m_bCurrentlySubscribedToSteam = false;
@@ -1627,7 +1624,7 @@ void CPlayerInventory::SendInventoryUpdateEvent()
 #endif
 #if defined( GAME_DLL ) && !defined( NO_STEAM_GAMECOORDINATOR )
 	extern void OnInventoryUpdatedForSteamID( CSteamID steamID );
-	OnInventoryUpdatedForSteamID( GetSteamIDFromSOID( m_OwnerID ) );
+	OnInventoryUpdatedForSteamID( m_OwnerID );
 #endif
 }
 
@@ -1680,7 +1677,7 @@ void CPlayerInventory::DumpInventoryToConsole( bool bRoot )
 #ifdef CLIENT_DLL
 		Msg("(CLIENT) Inventory:\n");
 #else
-		Msg("(SERVER) Inventory for account (%d):\n", GetSteamIDFromSOID( m_OwnerID ).GetAccountID() );
+		Msg("(SERVER) Inventory for account (%d):\n", m_OwnerID.GetAccountID() );
 #endif
 		Msg("  Version: %llu:\n", m_pSOCache ? m_pSOCache->GetVersion() : -1 );
 	}

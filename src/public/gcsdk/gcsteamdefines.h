@@ -1,4 +1,4 @@
-//====== Copyright (c), Valve Corporation, All rights reserved. =======
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Defines a bunch of stuff that would be defined in Steam, but
 //			isn't in Source.
@@ -18,12 +18,6 @@
 #define PvAlloc(x) malloc(x)
 #define PvRealloc(x, y) realloc(x, y)
 #define FreePv(x) free(x)
-
-#ifdef _DEBUG
-#define DbgVerify(x) Assert(x)
-#else
-#define DbgVerify(x) (x)
-#endif
 
 // auto-lock class for read-write locks
 template< class T >
@@ -45,8 +39,8 @@ public:
 #define AUTO_LOCK_WRITE( mutex ) CRWLockAutoWrite<CThreadRWLock> UNIQUE_ID( mutex )
 #define AUTO_LOCK_SPIN_WRITE( mutex ) CRWLockAutoWrite<CThreadSpinRWLock> UNIQUE_ID( mutex )
 
-//inline void *MemAlloc_AllocAligned( size_t size, size_t align, bool bCanFail ) { return MemAlloc_AllocAligned( size, align ); }
-inline void MemAlloc_FreeAligned( void *pMemBlock, bool bOperatorNew ) { MemAlloc_FreeAligned( pMemBlock ); }
+// inline void *MemAlloc_AllocAligned( size_t size, size_t align, bool bCanFail ) { return MemAlloc_AllocAligned( size, align ); }
+// inline void MemAlloc_FreeAligned( void *pMemBlock, bool bOperatorNew ) { MemAlloc_FreeAligned( pMemBlock ); }
 
 #endif
 
