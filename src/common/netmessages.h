@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -375,8 +375,34 @@ inline void NetMsgSetCVarUsingDictionary( CMsg_CVars::CVar *convar, char const *
 {
 	convar->set_value( value );
 	
-	if ( 0 ) ( void ) 0;
-	/** Removed for partner depot **/
+	if ( !V_stricmp( name, "accountid" ) ) convar->set_dictionary_name( 1 );
+	else if ( !V_stricmp( name, "password" ) ) convar->set_dictionary_name( 2 );
+	else if ( !V_stricmp( name, "cl_use_opens_buy_menu" ) ) convar->set_dictionary_name( 3 );
+	else if ( !V_stricmp( name, "tv_nochat" ) ) convar->set_dictionary_name( 4 );
+	else if ( !V_stricmp( name, "cl_clanid" ) ) convar->set_dictionary_name( 5 );
+	else if ( !V_stricmp( name, "name" ) ) convar->set_dictionary_name( 6 );
+	else if ( !V_stricmp( name, "cl_interp_ratio" ) ) convar->set_dictionary_name( 7 );
+	else if ( !V_stricmp( name, "cl_predict" ) ) convar->set_dictionary_name( 8 );
+	else if ( !V_stricmp( name, "cl_updaterate" ) ) convar->set_dictionary_name( 9 );
+	else if ( !V_stricmp( name, "cl_session" ) ) convar->set_dictionary_name( 10 );
+	else if ( !V_stricmp( name, "voice_loopback" ) ) convar->set_dictionary_name( 11 );
+	else if ( !V_stricmp( name, "cl_lagcompensation" ) ) convar->set_dictionary_name( 12 );
+	else if ( !V_stricmp( name, "cl_color" ) ) convar->set_dictionary_name( 13 );
+	else if ( !V_stricmp( name, "cl_cmdrate" ) ) convar->set_dictionary_name( 14 );
+	else if ( !V_stricmp( name, "net_maxroutable" ) ) convar->set_dictionary_name( 15 );
+	else if ( !V_stricmp( name, "rate" ) ) convar->set_dictionary_name( 16 );
+	else if ( !V_stricmp( name, "cl_predictweapons" ) ) convar->set_dictionary_name( 17 );
+	else if ( !V_stricmp( name, "cl_autohelp" ) ) convar->set_dictionary_name( 18 );
+	else if ( !V_stricmp( name, "cl_interp" ) ) convar->set_dictionary_name( 19 );
+	else if ( !V_stricmp( name, "cl_autowepswitch" ) ) convar->set_dictionary_name( 20 );
+	else if ( !V_stricmp( name, "cl_spec_mode" ) ) convar->set_dictionary_name( 21 );
+	else if ( !V_stricmp( name, "tv_relay" ) ) convar->set_dictionary_name( 22 );
+	else if ( !V_stricmp( name, "hltv_slots" ) ) convar->set_dictionary_name( 23 );
+	else if ( !V_stricmp( name, "hltv_clients" ) ) convar->set_dictionary_name( 24 );
+	else if ( !V_stricmp( name, "hltv_addr" ) ) convar->set_dictionary_name( 25 );
+	else if ( !V_stricmp( name, "hltv_proxies" ) ) convar->set_dictionary_name( 26 );
+	else if ( !V_stricmp( name, "sv_bot_difficulty_kbm" ) ) convar->set_dictionary_name( 27 );
+	else if ( !V_stricmp( name, "hltv_sdr" ) ) convar->set_dictionary_name( 28 );
 	else
 	{
 #ifdef _DEBUG
@@ -392,8 +418,34 @@ inline void NetMsgExpandCVarUsingDictionary( CMsg_CVars::CVar *convar )
 		return;
 	switch ( convar->dictionary_name() )
 	{
-	case 0: return;
-	/** Removed for partner depot **/
+	case 1:  convar->set_name( "accountid" ); break;
+	case 2:  convar->set_name( "password" ); break;
+	case 3:  convar->set_name( "cl_use_opens_buy_menu" ); break;
+	case 4:  convar->set_name( "tv_nochat" ); break;
+	case 5:  convar->set_name( "cl_clanid" ); break;
+	case 6:  convar->set_name( "name" ); break;
+	case 7:  convar->set_name( "cl_interp_ratio" ); break;
+	case 8:  convar->set_name( "cl_predict" ); break;
+	case 9:  convar->set_name( "cl_updaterate" ); break;
+	case 10: convar->set_name( "cl_session" ); break;
+	case 11: convar->set_name( "voice_loopback" ); break;
+	case 12: convar->set_name( "cl_lagcompensation" ); break;
+	case 13: convar->set_name( "cl_color" ); break;
+	case 14: convar->set_name( "cl_cmdrate" ); break;
+	case 15: convar->set_name( "net_maxroutable" ); break;
+	case 16: convar->set_name( "rate" ); break;
+	case 17: convar->set_name( "cl_predictweapons" ); break;
+	case 18: convar->set_name( "cl_autohelp" ); break;
+	case 19: convar->set_name( "cl_interp" ); break;
+	case 20: convar->set_name( "cl_autowepswitch" ); break;
+	case 21: convar->set_name( "cl_spec_mode" ); break;
+	case 22: convar->set_name( "tv_relay" ); break;
+	case 23: convar->set_name( "hltv_slots" ); break;
+	case 24: convar->set_name( "hltv_clients" ); break;
+	case 25: convar->set_name( "hltv_addr" ); break;
+	case 26: convar->set_name( "hltv_proxies" ); break;
+	case 27: convar->set_name( "sv_bot_difficulty_kbm" ); break;
+	case 28: convar->set_name( "hltv_sdr" ); break;
 	default:
 		DevWarning( "Invalid dictionary entry for cvar # %d\n", convar->dictionary_name() );
 		convar->set_name( "undefined" );
@@ -408,10 +460,37 @@ inline const char * NetMsgGetCVarUsingDictionary( CMsg_CVars::CVar const &convar
 	switch ( convar.dictionary_name() )
 	{
 	case 0: return "";
-	/** Removed for partner depot **/
-default:
-	DevWarning( "Invalid dictionary entry for cvar # %d\n", convar.dictionary_name() );
-	return "undefined";
+	case 1:  return "accountid";
+	case 2:  return "password";
+	case 3:  return "cl_use_opens_buy_menu";
+	case 4:  return "tv_nochat";
+	case 5:  return "cl_clanid";
+	case 6:  return "name";
+	case 7:  return "cl_interp_ratio";
+	case 8:  return "cl_predict";
+	case 9:  return "cl_updaterate";
+	case 10: return "cl_session";
+	case 11: return "voice_loopback";
+	case 12: return "cl_lagcompensation";
+	case 13: return "cl_color";
+	case 14: return "cl_cmdrate";
+	case 15: return "net_maxroutable";
+	case 16: return "rate";
+	case 17: return "cl_predictweapons";
+	case 18: return "cl_autohelp";
+	case 19: return "cl_interp";
+	case 20: return "cl_autowepswitch";
+	case 21: return "cl_spec_mode";
+	case 22: return "tv_relay";
+	case 23: return "hltv_slots";
+	case 24: return "hltv_clients";
+	case 25: return "hltv_addr";
+	case 26: return "hltv_proxies";
+	case 27: return "sv_bot_difficulty_kbm";
+	case 28: return "hltv_sdr";
+	default:
+		DevWarning( "Invalid dictionary entry for cvar # %d\n", convar.dictionary_name() );
+		return "undefined";
 	}
 }
 
