@@ -422,8 +422,8 @@ public:
 	virtual bool BYieldingRunGCJob( GCSDK::IMsgNetPacket *pNetPacket )
 	{
 		CProtoBufMsg<CMsgSOSingleObject> msg( pNetPacket );
-		SOCDebug( "CGCSOCreateJob(owner=%s, type=%d)\n", CSteamID( msg.Body().owner() ).Render(), msg.Body().type_id() );
-		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( msg.Body().owner() );
+		SOCDebug( "CGCSOCreateJob(owner=%s, type=%d)\n", CSteamID( GetSteamIDFromSOID( msg.Body().owner_soid() ) ).Render(), msg.Body().type_id() );
+		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( GetSteamIDFromSOID( msg.Body().owner_soid() ) );
 		if ( pSOCache )
 		{
 			pSOCache->BCreateFromMsg( msg.Body().type_id(), msg.Body().object_data().data(), msg.Body().object_data().size() );
@@ -445,8 +445,8 @@ public:
 	virtual bool BYieldingRunGCJob( GCSDK::IMsgNetPacket *pNetPacket )
 	{
 		CProtoBufMsg<CMsgSOSingleObject> msg( pNetPacket );
-		SOCDebug( "CGCSODestroyJob(owner=%s, type=%d)\n", CSteamID( msg.Body().owner() ).Render(), msg.Body().type_id() );
-		CGCClientSharedObjectCache *pCache = m_pGCClient->FindSOCache( msg.Body().owner(), false );
+		SOCDebug( "CGCSODestroyJob(owner=%s, type=%d)\n", CSteamID( GetSteamIDFromSOID( msg.Body().owner_soid() ) ).Render(), msg.Body().type_id() );
+		CGCClientSharedObjectCache *pCache = m_pGCClient->FindSOCache( GetSteamIDFromSOID( msg.Body().owner_soid() ), false );
 		if( pCache )
 		{
 			pCache->BDestroyFromMsg( msg.Body().type_id(), msg.Body().object_data().data(), msg.Body().object_data().size() );
@@ -468,8 +468,8 @@ public:
 	virtual bool BYieldingRunGCJob( GCSDK::IMsgNetPacket *pNetPacket )
 	{
 		CProtoBufMsg<CMsgSOSingleObject> msg( pNetPacket );
-		SOCDebug( "CGCSOUpdateJob(owner=%s, type=%d)\n", CSteamID( msg.Body().owner() ).Render(), msg.Body().type_id() );
-		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( msg.Body().owner() );
+		SOCDebug( "CGCSOUpdateJob(owner=%s, type=%d)\n", CSteamID( GetSteamIDFromSOID( msg.Body().owner_soid() ) ).Render(), msg.Body().type_id() );
+		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( GetSteamIDFromSOID( msg.Body().owner_soid() ) );
 		if ( pSOCache )
 		{
 			pSOCache->BUpdateFromMsg( msg.Body().type_id(), msg.Body().object_data().data(), msg.Body().object_data().size() );
@@ -491,17 +491,31 @@ public:
 	virtual bool BYieldingRunGCJob( GCSDK::IMsgNetPacket *pNetPacket )
 	{
 		CProtoBufMsg<CMsgSOMultipleObjects> msg( pNetPacket );
-		SOCDebug( "CGCSOUpdateJob(owner=%s)\n", CSteamID( msg.Body().owner() ).Render() );
-		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( msg.Body().owner() );
+		SOCDebug( "CGCSOUpdateJob(owner=%s)\n", CSteamID( GetSteamIDFromSOID( msg.Body().owner_soid() ) ).Render() );
+		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( GetSteamIDFromSOID( msg.Body().owner_soid() ) );
 		if ( pSOCache )
 		{
 			pSOCache->m_context.PreSOUpdate( eSOCacheEvent_Incremental );
 
-			for ( int i = 0; i < msg.Body().objects_size(); ++i )
+			for ( int i = 0; i < msg.Body().objects_added_size(); ++i )
 			{
-				const CMsgSOMultipleObjects_SingleObject &objMessage = msg.Body().objects( i );
+				const CMsgSOMultipleObjects_SingleObject &objMessage = msg.Body().objects_added( i );
+				SOCDebug( "     type %d\n", objMessage.type_id() );
+				pSOCache->BCreateFromMsg( objMessage.type_id(), objMessage.object_data().data(), objMessage.object_data().size() );
+			}
+
+			for ( int i = 0; i < msg.Body().objects_modified_size(); ++i )
+			{
+				const CMsgSOMultipleObjects_SingleObject &objMessage = msg.Body().objects_modified( i );
 				SOCDebug( "     type %d\n", objMessage.type_id() );
 				pSOCache->BUpdateFromMsg( objMessage.type_id(), objMessage.object_data().data(), objMessage.object_data().size() );
+			}
+
+			for ( int i = 0; i < msg.Body().objects_removed_size(); ++i )
+			{
+				const CMsgSOMultipleObjects_SingleObject &objMessage = msg.Body().objects_removed( i );
+				SOCDebug( "     type %d\n", objMessage.type_id() );
+				pSOCache->BDestroyFromMsg( objMessage.type_id(), objMessage.object_data().data(), objMessage.object_data().size() );
 			}
 
 			pSOCache->m_context.PostSOUpdate( eSOCacheEvent_Incremental );
@@ -522,17 +536,17 @@ public:
 	virtual bool BYieldingRunGCJob( GCSDK::IMsgNetPacket *pNetPacket )
 	{
 		CProtoBufMsg< CMsgSOCacheSubscribed > msg ( pNetPacket );
-		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( msg.Body().owner(), true );
+		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( GetSteamIDFromSOID( msg.Body().owner_soid() ), true );
 
 		Assert( pSOCache );
 		if( pSOCache )
 		{
-			SOCDebug( "CGCSOCacheSubscribedJob(owner=%s) [in cache]\n", CSteamID( msg.Body().owner() ).Render() );
+			SOCDebug( "CGCSOCacheSubscribedJob(owner=%s) [in cache]\n", CSteamID( GetSteamIDFromSOID( msg.Body().owner_soid() ) ).Render() );
 			DbgVerify( pSOCache->BParseCacheSubscribedMsg( msg.Body() ) );
 		}
 		else
 		{
-			SOCDebug( "CGCSOCacheSubscribedJob(owner=%s) [not in cache]\n", CSteamID( msg.Body().owner() ).Render() );
+			SOCDebug( "CGCSOCacheSubscribedJob(owner=%s) [not in cache]\n", CSteamID( GetSteamIDFromSOID( msg.Body().owner_soid() ) ).Render() );
 		}
 
 		m_pGCClient->Test_CacheSubscribed( pSOCache->GetOwner() );
@@ -552,8 +566,8 @@ public:
 	virtual bool BYieldingRunGCJob( GCSDK::IMsgNetPacket *pNetPacket )
 	{
 		CProtoBufMsg< CMsgSOCacheUnsubscribed > msg( pNetPacket );
-		SOCDebug( "CGCSOCacheUnsubscribedJob(owner=%s)\n", CSteamID( msg.Body().owner() ).Render() );
-		m_pGCClient->NotifySOCacheUnsubscribed( msg.Body().owner() );
+		SOCDebug( "CGCSOCacheUnsubscribedJob(owner=%s)\n", CSteamID( GetSteamIDFromSOID( msg.Body().owner_soid() ) ).Render() );
+		m_pGCClient->NotifySOCacheUnsubscribed( GetSteamIDFromSOID( msg.Body().owner_soid() ) );
 
 		return true;
 	}
@@ -570,19 +584,20 @@ public:
 	virtual bool BYieldingRunGCJob( GCSDK::IMsgNetPacket *pNetPacket )
 	{
 		CProtoBufMsg< CMsgSOCacheSubscriptionCheck > msg ( pNetPacket );
-		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( msg.Body().owner(), false );
+		CGCClientSharedObjectCache *pSOCache = m_pGCClient->FindSOCache( GetSteamIDFromSOID( msg.Body().owner_soid() ), false );
 
 		// if we do not have the cache or it is out-of-date, request a refresh
 		if ( pSOCache == NULL || !pSOCache->BIsInitialized() || pSOCache->GetVersion() != msg.Body().version() )
 		{
-			SOCDebug( "CGCSOCacheSubscriptionCheck(owner=%s) -- need refresh\n", CSteamID( msg.Body().owner() ).Render() );
+			SOCDebug( "CGCSOCacheSubscriptionCheck(owner=%s) -- need refresh\n", CSteamID( GetSteamIDFromSOID( msg.Body().owner_soid() ) ).Render() );
 			CProtoBufMsg< CMsgSOCacheSubscriptionRefresh > msg_response( k_ESOMsg_CacheSubscriptionRefresh );
-			msg_response.Body().set_owner( msg.Body().owner() );
+			CMsgSOIDOwner owner_soid( msg.Body().owner_soid() );
+			msg_response.Body().set_allocated_owner_soid( &owner_soid );
 			m_pGCClient->BSendMessage( msg_response );
 		}
 		else
 		{
-			SOCDebug( "CGCSOCacheSubscriptionCheck(owner=%s) -- up-to-date, no refresh needed\n", CSteamID( msg.Body().owner() ).Render() );
+			SOCDebug( "CGCSOCacheSubscriptionCheck(owner=%s) -- up-to-date, no refresh needed\n", CSteamID( GetSteamIDFromSOID( msg.Body().owner_soid() ) ).Render() );
 
 			// This is one method by which the GC notifies us that we are subscribed.
 			if ( !pSOCache->BIsSubscribed() )

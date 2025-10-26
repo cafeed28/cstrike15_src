@@ -10,6 +10,7 @@
 #pragma once
 #endif
 
+#include "soid.h"
 #include "sharedobject.h"
 
 namespace GCSDK

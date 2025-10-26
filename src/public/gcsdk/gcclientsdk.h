@@ -53,6 +53,7 @@
 #include "job.h"
 #include "jobmgr.h"
 #include "netpacketpool.h"
+#include "soid.h"
 #include "sharedobject.h"
 #include "protobufsharedobject.h"
 #include "sharedobjectcache.h"

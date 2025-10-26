@@ -8,6 +8,7 @@ $MacroRequired "PLATFORM"
 $MacroRequired GENERATED_PROTO_DIR
 
 $include "$SRCDIR\vpc_scripts\protobuf_builder.vpc"
+$include "$SRCDIR\gcsdk\gcsdk_gcmessages_include.vpc"
 $include "$SRCDIR\gcsdk\steammessages_include.vpc"
 
 $MacroRequired	PROTOBUF_BUILDER_INCLUDED
