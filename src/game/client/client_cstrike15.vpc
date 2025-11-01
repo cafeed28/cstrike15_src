@@ -620,8 +620,12 @@ $Project "Client (CSGO)"
 
 			$Folder "sfcomponents"
 			{
+				$File	"cstrike15\components\scaleformcomponent_common.cpp"
+				$File	"cstrike15\components\scaleformcomponent_common.h"
 				$File	"cstrike15\uicomponents\uicomponent_common.cpp"
 				$File	"cstrike15\uicomponents\uicomponent_common.h"
+				$File	"cstrike15\uicomponents\uicomponent_competitivematch.cpp"
+				$File	"cstrike15\uicomponents\uicomponent_competitivematch.h"
 				$File	"cstrike15\uicomponents\uicomponent_mypersona.cpp"
 				$File	"cstrike15\uicomponents\uicomponent_mypersona.h"
 				$File	"cstrike15\uicomponents\uicomponent_friendslist.cpp"
