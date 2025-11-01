@@ -316,6 +316,7 @@ void CCreateMainMenuScreenScaleform::OnEvent( KeyValues *pEvent )
 			bOnce = true;
 			// RE TODO: perfect world error
 		}
+		return;
 	}
 
     SF_COMPONENT_FORWARD_EVENT(pEvent->GetName());
