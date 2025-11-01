@@ -642,6 +642,9 @@ $Project "Client (CSGO)"
 				$File "hltvreplaysystem.h"
 				$File "hltvreplaysystem.cpp"
 			}
+
+			$File	"$SRCDIR\game\client\cstrike15\cs_gc_client.cpp"
+			$File	"$SRCDIR\game\client\cstrike15\cs_gc_client.h"
 		}
 	}
 

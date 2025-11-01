@@ -354,6 +354,9 @@ $Project $SPROJ
 				$File	"$SRVSRCDIR\cstrike15\cs_nav_path.cpp"
 				$File	"$SRVSRCDIR\cstrike15\cs_nav_path.h"
 			}
+
+			$File	"$SRVSRCDIR\cstrike15\cs_gc_server.cpp"
+			$File	"$SRVSRCDIR\cstrike15\cs_gc_server.h"
 		}
 	}
 }

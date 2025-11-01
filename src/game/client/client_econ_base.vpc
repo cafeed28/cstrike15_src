@@ -62,6 +62,9 @@ $Project
 			$File	"$SRCDIR/game/shared/econ/localization_provider.h"
 
 			$File	"$SRCDIR/game/shared/econ/game_item_schema.h"
+
+			$File	"$SRCDIR/game/shared/gc_clientsystem.h"
+			$File	"$SRCDIR/game/shared/gc_clientsystem.cpp"
 		}
 		$Folder	"Economy Client"
 		{
