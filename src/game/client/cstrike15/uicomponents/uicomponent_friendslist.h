@@ -58,9 +58,9 @@ private:
 	FIF_RE_TODO(ActionShowCSGOProfile);
 	FIF_RE_TODO(ActionWatchFriendSession);
 	FIF_RE_TODO(GetFriendClanTag);
-	FIF_RE_TODO(GetFriendCommendations);
-	FIF_RE_TODO(GetFriendCompetitiveRank);
-	FIF_RE_TODO(GetFriendCompetitiveWins);
+	int GetFriendCommendations(const char* pchSteamID, const char* szCommendation);
+	int GetFriendCompetitiveRank(const char* pchSteamID);
+	int GetFriendCompetitiveWins(const char* pchSteamID);
 	FIF_RE_TODO(GetFriendDisplayItemDefByIndex);
 	FIF_RE_TODO(GetFriendDisplayItemDefCount);
 	FIF_RE_TODO(GetFriendDisplayItemDefFeatured);

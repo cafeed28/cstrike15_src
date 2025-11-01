@@ -1,5 +1,6 @@
 #include "cbase.h"
 #include "uicomponent_friendslist.h"
+#include "uicomponent_mypersona.h"
 
 #include "cdll_client_int.h"
 #include "c_playerresource.h"
@@ -52,6 +53,8 @@ SF_COMPONENT_API_DEF_BEGIN(CUiComponent_FriendsList)
 	SF_COMPONENT_FUNCTION_API_DEF(void, GetXuidByIndex, /*CUiComponent_UsersListBase*/ CUiComponent_FriendsList)
 SF_COMPONENT_API_DEF_END(CUiComponent_FriendsList)
 
+
+static CSteamID s_steamIdMyself;
 UI_COMPONENT_API_DEF_COMMON(CUiComponent_FriendsList, FriendsList)
 
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetXuidFromFriendCode)
@@ -119,9 +122,35 @@ SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, IsFriendJoinable)
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, IsFriendWatchable)
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, IsFriendInvited)
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetFriendIsVacBanned)
-SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetFriendCompetitiveRank)
-SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetFriendCompetitiveWins)
-SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetFriendCommendations)
+
+SF_COMPONENT_FUNCTION_IMPL(CUiComponent_FriendsList, GetFriendCompetitiveRank)
+{
+	if (pui->Params_GetArgType(obj, 0) == IUIMarshalHelper::VT_String)
+	{
+		pui->Params_SetResult(obj, GetFriendCompetitiveRank(pui->Params_GetArgAsString(obj, 0)));
+	}
+}
+
+SF_COMPONENT_FUNCTION_IMPL(CUiComponent_FriendsList, GetFriendCompetitiveWins)
+{
+	if (pui->Params_GetArgType(obj, 0) == IUIMarshalHelper::VT_String)
+	{
+		const char* pchSteamID = pui->Params_GetArgAsString(obj, 0);
+		pui->Params_SetResult(obj, GetFriendCompetitiveWins(pchSteamID));
+	}
+}
+
+SF_COMPONENT_FUNCTION_IMPL(CUiComponent_FriendsList, GetFriendCommendations)
+{
+	if (pui->Params_GetArgType(obj, 0) == IUIMarshalHelper::VT_String)
+	{
+		const char* pchSteamID = pui->Params_GetArgAsString(obj, 0);
+		const char* szCommendations = pui->Params_GetArgType(obj, 1) == IUIMarshalHelper::VT_String ? pui->Params_GetArgAsString(obj, 1) : NULL;
+
+		pui->Params_SetResult(obj, GetFriendCommendations(pchSteamID, szCommendations));
+	}
+}
+
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetFriendMedalRankByType)
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetFriendLevel)
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetFriendXp)
@@ -150,9 +179,47 @@ SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, IsGamePaused)
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetCount)
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetXuidByIndex)
 
+int CUiComponent_FriendsList::GetFriendCommendations(const char* pchSteamID, const char* szCommendation)
+{
+	CSteamID steamID(pchSteamID);
+	//CUiComponent_PartyList::CheckMyPersonaDataInPartyList(steamID);
+
+	if (!szCommendation || !*szCommendation)
+		return 0;
+
+	if (steamID == s_steamIdMyself)
+	{
+		return CUiComponent_MyPersona::GetInstance()->GetCommendations(szCommendation);
+	}
+
+	AssertOnce(false); // RE TODO
+}
+
+int CUiComponent_FriendsList::GetFriendCompetitiveRank(const char* pchSteamID)
+{
+	CSteamID steamID(pchSteamID);
+	if (steamID == s_steamIdMyself)
+	{
+		return CUiComponent_MyPersona::GetInstance()->GetCompetitiveRank();
+	}
+
+	AssertOnce(false); // RE TODO
+}
+
+int CUiComponent_FriendsList::GetFriendCompetitiveWins(const char* pchSteamID)
+{
+	CSteamID steamID(pchSteamID);
+	if (steamID == s_steamIdMyself)
+	{
+		return CUiComponent_MyPersona::GetInstance()->GetCompetitiveWins();
+	}
+
+	AssertOnce(false); // RE TODO
+}
+
 CUiComponent_FriendsList::CUiComponent_FriendsList()
 {
-	DevMsg(__FUNCTION__ "\n");
+	s_steamIdMyself = steamapicontext->SteamUser()->GetSteamID();
 }
 
 CUiComponent_FriendsList::~CUiComponent_FriendsList()
