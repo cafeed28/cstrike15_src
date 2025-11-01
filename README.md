@@ -2,7 +2,8 @@
 
 - Valve Software for the game
 - Maxx from VCC for the leaked source ([see](https://hl2-beta.ru/index.php?topic=28949.0))
-- LWSS for [`restored csgo weapon functionality`](https://github.com/SwagSoftware/Kisak-Strike/commit/89e2dd434460d3eeced706be872f2fc57619d877)
+- LWSS for [`restored csgo weapon functionality`](https://github.com/SwagSoftware/Kisak-Strike/commit/89e2dd434460d3eeced706be872f2fc57619d877),
+[`reverse more econ/quest stuff`](https://github.com/SwagSoftware/Kisak-Strike/commit/5fd9cf649e84125e78e38eb2afcf6a6111f8d1b5)
 - PiMoNFeeD for [`Fix broken spray patterns`](https://github.com/SwagSoftware/Kisak-Strike/commit/63f5eef2537d1876a2f928dfdfa59711dd96d702)
 
 # Depots
