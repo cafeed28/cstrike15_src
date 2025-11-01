@@ -53,9 +53,9 @@ SF_COMPONENT_API_DEF_BEGIN(CUiComponent_FriendsList)
 	SF_COMPONENT_FUNCTION_API_DEF(void, GetXuidByIndex, /*CUiComponent_UsersListBase*/ CUiComponent_FriendsList)
 SF_COMPONENT_API_DEF_END(CUiComponent_FriendsList)
 
+UI_COMPONENT_API_DEF_COMMON(CUiComponent_FriendsList, FriendsList)
 
 static CSteamID s_steamIdMyself;
-UI_COMPONENT_API_DEF_COMMON(CUiComponent_FriendsList, FriendsList)
 
 SF_COMPONENT_FUNCTION_TODO(CUiComponent_FriendsList, GetXuidFromFriendCode)
 
