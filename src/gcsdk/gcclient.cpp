@@ -6,8 +6,10 @@
 
 #include "stdafx.h"
 #include "gcclient.h"
-#include "steam/isteamgamecoordinator.h"
 #include "gcsdk_gcmessages.pb.h"
+#include "steam/isteamgamecoordinator.h"
+#include "steam/isteamgameserver.h"
+#include "steam/isteamuser.h"
 
 namespace GCSDK
 {
@@ -24,7 +26,18 @@ CGCClient::CGCClient( ISteamGameCoordinator *pSteamGameCoordinator, bool bGamese
 #ifndef STEAM
 	m_callbackGCMessageAvailable( NULL, NULL ),
 #endif
-	m_mapSOCache( DefLessFunc(CSteamID) )
+	m_mapSOCache( DefLessFunc(CSteamID) ),
+	m_unVersion( 0 ),
+	m_nConnectionStatus( GCConnectionStatus_NO_STEAM ),
+	m_bGameserver( bGameserver ),
+	m_bSimulateGCConnectionFailure( false ),
+	m_nSessionNeed( 0 ),
+	m_nLastSessionNeed( -1 ),
+	m_bWantSession( true ),
+	m_nLauncherType( 0 ),
+	m_usSteamdatagramPort( 0 ),
+	m_nLogonQueuePosition( -1 ),
+	m_nLogonQueueSize( -1 )
 {
 #ifndef STEAM
 	if( bGameserver )
@@ -34,10 +47,20 @@ CGCClient::CGCClient( ISteamGameCoordinator *pSteamGameCoordinator, bool bGamese
 #endif
 	if( pSteamGameCoordinator )
 	{
-		DbgVerify( BInit( pSteamGameCoordinator ) );
+		//DbgVerify( BInit( pSteamGameCoordinator ) );
 	}
-}
 
+	if ( CommandLine()->FindParm( "-perfectworld" ) )
+	{
+		m_nLauncherType = GCClientLauncherType_PERFECTWORLD;
+	}
+
+	m_timeLastSendHello.SetLTime( 0 );
+	m_timeReceivedConnectionStatus.SetLTime( 0 );
+	m_timeLoggedOn.SetLTime( 0 );
+	m_timeLogonQueueEstimatedTimeExitQueue.SetLTime( 0 );
+	m_timeLogonQueueApproxTimeEnteredQueue.SetLTime( 0 );
+}
 
 //------------------------------------------------------------------------------
 // Purpose: Constructor
@@ -173,12 +196,7 @@ void CGCClient::OnGCMessageAvailable( GCMessageAvailable_t *pCallback )
 				// Safety check against malformed packet
 				if ( pMsgNetPacket.Get() != NULL )
 				{
-
-					// dispatch the packet
-					GetJobMgr().BRouteMsgToJob( this, pMsgNetPacket.Get(), JobMsgInfo_t( pMsgNetPacket->GetEMsg(), pMsgNetPacket->GetSourceJobID(), pMsgNetPacket->GetTargetJobID(), k_EServerTypeGCClient ) );
-
-					// keep track of how much we've sent/received this message
-					g_theMessageList.TallySendMessage( pMsgNetPacket->GetEMsg(), cubData );
+					DispatchPacket( pMsgNetPacket.Get() );
 				}
 
 				// release the packet
@@ -202,12 +220,7 @@ void CGCClient::OnGCMessageAvailable( GCMessageAvailable_t *pCallback )
 				// Safety check against malformed packet
 				if ( pMsgNetPacket.Get() != NULL )
 				{
-
-					// dispatch the packet
-					GetJobMgr().BRouteMsgToJob( this, pMsgNetPacket.Get(), JobMsgInfo_t( pMsgNetPacket->GetEMsg(), pMsgNetPacket->GetSourceJobID(), pMsgNetPacket->GetTargetJobID(), k_EServerTypeGCClient ) );
-
-					// keep track of how much we've sent/received this message
-					g_theMessageList.TallySendMessage( pMsgNetPacket->GetEMsg(), cubData );
+					DispatchPacket( pMsgNetPacket.Get() );
 				}
 
 				// release the packet
@@ -217,29 +230,216 @@ void CGCClient::OnGCMessageAvailable( GCMessageAvailable_t *pCallback )
 	}
 }
 
+void CGCClient::DispatchPacket( IMsgNetPacket *pMsgNetPacket )
+{
+	MsgType_t eMsg = pMsgNetPacket->GetEMsg();
+
+	if ( eMsg == k_EMsgGCClientConnectionStatus || eMsg == k_EMsgGCServerConnectionStatus )
+	{
+		CProtoBufMsg< CMsgConnectionStatus > msg( pMsgNetPacket );
+		
+		uint32 nPrevConnectionStatus = m_nConnectionStatus;
+		m_nConnectionStatus = msg.Body().status();
+		m_timeReceivedConnectionStatus.SetToJobTime();
+		m_nLogonQueuePosition = m_nLogonQueueSize = -1;
+		m_timeLogonQueueEstimatedTimeExitQueue.SetLTime( 0 );
+		m_timeLogonQueueApproxTimeEnteredQueue.SetLTime( 0 );
+
+		if ( msg.Body().has_queue_position() && msg.Body().has_queue_size() )
+		{
+			m_nLogonQueuePosition = msg.Body().queue_position();
+			m_nLogonQueueSize = msg.Body().queue_size();
+			Msg( "You are #%d in line of %d waiting players.\n", m_nLogonQueuePosition, m_nLogonQueueSize );
+		}
+
+		if ( msg.Body().has_wait_seconds() )
+		{
+			int wait_seconds = msg.Body().wait_seconds();
+			Msg( "You have been waiting for approximately %02d:%02d.\n", wait_seconds / 60, wait_seconds % 60 );
+			m_timeLogonQueueApproxTimeEnteredQueue.SetFromJobTime( wait_seconds * -k_nMillion );
+		}
+
+		int estimated_wait_seconds_remaining = msg.Body().estimated_wait_seconds_remaining();
+		if ( estimated_wait_seconds_remaining > 0 )
+		{
+			Msg( "Estimated wait time remaining is %02d:%02d.\n", estimated_wait_seconds_remaining / 60, estimated_wait_seconds_remaining % 60 );
+			m_timeLogonQueueEstimatedTimeExitQueue.SetFromJobTime( estimated_wait_seconds_remaining * k_nMillion );
+		}
+
+		if ( m_nConnectionStatus == GCConnectionStatus_HAVE_SESSION )
+		{
+			EmitInfo( SPEW_GC, 1, 1, "Connection to GC confirmed.\n" );
+		}
+		else if ( m_nConnectionStatus == GCConnectionStatus_NO_SESSION )
+		{
+			if ( nPrevConnectionStatus == GCConnectionStatus_HAVE_SESSION )
+				EmitInfo( SPEW_GC, 1, 1, "Connection to GC has been lost.\n" );
+			if ( m_bWantSession )
+				EmitInfo( SPEW_GC, 1, 1, "Attempting to re-establish GC connection.\n" );
+			else
+				EmitInfo( SPEW_GC, 1, 1, "Notifying GC we don't need a session.\n" );
+			
+			SendHello();
+		}
+		else if ( m_nConnectionStatus == GCConnectionStatus_NO_SESSION_IN_LOGON_QUEUE )
+		{
+			EmitInfo( SPEW_GC, 1, 1, "In logon queue; waiting for GC to confirm connection.\n" );
+			m_nLastSessionNeed = msg.Body().client_session_need();
+		}
+		else
+		{
+			m_timeLastSendHello.SetToJobTime();
+			float flRandom = ( RandomFloat( 0, 10 ) + 60 ) * k_nMillion;
+			m_timeLastSendHello += Clamp( (int)flRandom, 0, INT32_MAX );
+		}
+	}
+	else if ( eMsg == k_EMsgGCServerWelcome && m_bGameserver )
+	{
+		EmitInfo( SPEW_GC, 1, 1, "Received server welcome from GC.\n" );
+		
+		m_nConnectionStatus = GCConnectionStatus_HAVE_SESSION;
+		m_timeReceivedConnectionStatus.SetToJobTime();
+		m_nLogonQueuePosition = m_nLogonQueueSize = -1;
+		m_timeLogonQueueEstimatedTimeExitQueue.SetLTime( 0 );
+		m_timeLogonQueueApproxTimeEnteredQueue.SetLTime( 0 );
+
+		CProtoBufMsg< CMsgClientWelcome > msg( pMsgNetPacket );
+		ProcessWelcomeMsg( msg.Body() );
+	}
+	else if ( eMsg == k_EMsgGCClientWelcome )
+	{
+		EmitInfo( SPEW_GC, 1, 1, "Received client welcome from GC.\n" );
+		
+		m_nConnectionStatus = GCConnectionStatus_HAVE_SESSION;
+		m_timeReceivedConnectionStatus.SetToJobTime();
+		m_nLogonQueuePosition = m_nLogonQueueSize = -1;
+		m_timeLogonQueueEstimatedTimeExitQueue.SetLTime( 0 );
+		m_timeLogonQueueApproxTimeEnteredQueue.SetLTime( 0 );
+
+		CProtoBufMsg< CMsgClientWelcome > msg( pMsgNetPacket );
+		ProcessWelcomeMsg( msg.Body() );
+	}
+
+	// dispatch the packet
+	GetJobMgr().BRouteMsgToJob( this, pMsgNetPacket, JobMsgInfo_t( pMsgNetPacket->GetEMsg(), pMsgNetPacket->GetSourceJobID(), pMsgNetPacket->GetTargetJobID(), k_EServerTypeGCClient ) );
+
+	// keep track of how much we've sent/received this message
+	g_theMessageList.TallySendMessage( pMsgNetPacket->GetEMsg(), pMsgNetPacket->CubData() );
+}
+
 
 //------------------------------------------------------------------------------
 // Purpose: Performs all the initialization for the GC Client instance
 // Outputs: Returns false if the initialization failed
 //------------------------------------------------------------------------------
-bool CGCClient::BInit( ISteamGameCoordinator *pSteamGameCoordinator )
+bool CGCClient::BInit( uint32 unVersion, ISteamClient *pSteamClient, HSteamUser hSteamUser, HSteamPipe hSteamPipe )
 {
+	if ( !pSteamClient )
+		return false;
+
+	m_pSteamGameCoordinator = (ISteamGameCoordinator*)pSteamClient->GetISteamGenericInterface( hSteamUser, hSteamPipe, STEAMGAMECOORDINATOR_INTERFACE_VERSION );
+	if ( !m_pSteamGameCoordinator )
+		return false;
+
+	if ( m_bGameserver )
+	{
+		m_pSteamGameserver = pSteamClient->GetISteamGameServer( hSteamUser, hSteamPipe, STEAMGAMESERVER_INTERFACE_VERSION );
+		if ( !m_pSteamGameserver )
+			return false;
+	}
+	else
+	{
+		m_pSteamUser = pSteamClient->GetISteamUser( hSteamUser, hSteamPipe, STEAMUSER_INTERFACE_VERSION );
+		if ( !m_pSteamUser )
+			return false;
+	}
+
+	m_unVersion = unVersion;
+
 	// Set the job pool size. Threads get lazily created so if no code
 	// is using the thread pool, no threads will be created.
 	m_JobMgr.SetThreadPoolSize( GetCPUInformation().m_nLogicalProcessors - 1 );
 
 	MsgRegistrationFromEnumDescriptor( EGCSystemMsg_descriptor(), GCSDK::MT_GC );
-
-	m_pSteamGameCoordinator = pSteamGameCoordinator;
+	MsgRegistrationFromEnumDescriptor( EGCBaseClientMsg_descriptor(), GCSDK::MT_GC );
+;
 #ifndef STEAM
 	m_callbackGCMessageAvailable.Register( this, &CGCClient::OnGCMessageAvailable );
-#endif	
+	//m_CallbackSteamServersDisconnected.Register( this, &CGCClient::OnSteamServersDisconnected );
+	//m_CallbackSteamServerConnectFailure.Register( this, &CGCClient::OnSteamServerConnectFailure );
+	//m_CallbackSteamServersConnected.Register( this, &CGCClient::OnSteamServersConnected );
+#endif
 
-	// process any messages that are already waiting
-	if( m_pSteamGameCoordinator )
+	bool bLoggedOn = false;
+	if (m_pSteamUser)
 	{
-		OnGCMessageAvailable( NULL );
+		bLoggedOn = m_pSteamUser->BLoggedOn();
 	}
+	else if (m_pSteamGameserver)
+	{
+		bLoggedOn = m_pSteamGameserver->BLoggedOn();
+	}
+
+	if (bLoggedOn)
+	{
+		m_timeLoggedOn.SetToJobTime();
+		m_nConnectionStatus = GCConnectionStatus_NO_SESSION;
+	}
+	else
+	{
+		m_timeLoggedOn.SetLTime(0);
+		m_nConnectionStatus = GCConnectionStatus_NO_STEAM;
+	}
+
+	if (m_nConnectionStatus != GCConnectionStatus_NO_STEAM)
+	{
+		m_nLogonQueuePosition = -1;
+		m_nLogonQueueSize = -1;
+		m_timeLogonQueueEstimatedTimeExitQueue.SetLTime(0);
+		m_timeLogonQueueApproxTimeEnteredQueue.SetLTime(0);
+	}
+
+	OnGCMessageAvailable( NULL );
+
+	int nWantSessionTimeout = -1;
+	int nTimeout = 2;
+
+	if (m_nConnectionStatus == GCConnectionStatus_NO_SESSION || m_nConnectionStatus == GCConnectionStatus_NO_STEAM)
+	{
+		return true;
+	}
+
+	if (m_bWantSession)
+	{
+		if (m_nConnectionStatus == GCConnectionStatus_NO_SESSION_IN_LOGON_QUEUE)
+		{
+			nWantSessionTimeout = 90;
+		}
+		else 
+		{
+			nWantSessionTimeout = 10;
+		}
+	}
+
+	if (m_nLastSessionNeed == m_nSessionNeed)
+	{
+		if (nWantSessionTimeout <= 0)
+			return true;
+		
+		nTimeout = nWantSessionTimeout;
+	}
+
+	if (m_timeLastSendHello.LTime() == 0)
+	{
+		SendHello();
+		return true;
+	}
+
+	if (m_timeLastSendHello > m_timeReceivedConnectionStatus)
+		m_timeReceivedConnectionStatus = m_timeLastSendHello;
+
+	if (CJobTime::LJobTimeCur() > m_timeReceivedConnectionStatus.LTime() + nTimeout * k_nMillion)
+		SendHello();
 	
 	return true;
 }
@@ -359,6 +559,90 @@ void CGCClient::NotifySOCacheUnsubscribed( const CSteamID & ownerID )
 	else
 	{
 		SOCDebug( "NotifySOCacheUnsubscribed(%s) [not in cache]\n", ownerID.Render()  );
+	}
+}
+
+//------------------------------------------------------------------------------
+// Purpose: 
+//------------------------------------------------------------------------------
+void CGCClient::SendHello()
+{
+	if ( !m_bWantSession )
+	{
+		EmitInfo( SPEW_GC, 1, 1, "Will not attempt to establish session with GC.\n" );
+		return;
+	}
+
+	m_timeLastSendHello.SetToJobTime();
+	m_nLastSessionNeed = m_nSessionNeed;
+	
+	bool bSuccess;
+
+	if ( !m_bGameserver )
+	{
+		CProtoBufMsg< CMsgClientHello > msg( m_nLauncherType == GCClientLauncherType_PERFECTWORLD ? k_EMsgGCClientHelloPW : k_EMsgGCClientHello );
+		msg.Body().set_version( m_unVersion );
+		msg.Body().set_client_session_need( m_nSessionNeed );
+		msg.Body().set_client_launcher( m_nLauncherType );
+		
+		FOR_EACH_MAP( m_mapSOCache, idx )
+		{
+			CMsgSOCacheHaveVersion* pMsg = msg.Body().mutable_socache_have_versions()->Add();
+
+			SOID_t soid( m_mapSOCache[ idx ]->GetOwner() );
+			soid.ToMsgSOIDOwner( pMsg->mutable_soid() );
+
+			pMsg->set_version( m_mapSOCache[ idx ]->GetVersion() );
+		}
+
+		bSuccess = BSendMessage( msg );
+	}
+	else
+	{
+		CProtoBufMsg< CMsgServerHello > msg( k_EMsgGCServerHello );
+		msg.Body().set_version( m_unVersion );
+		msg.Body().set_steamdatagram_port( m_usSteamdatagramPort );
+		msg.Body().set_client_launcher( m_nLauncherType );
+		
+		FOR_EACH_MAP( m_mapSOCache, idx )
+		{
+			CMsgSOCacheHaveVersion* pMsg = msg.Body().mutable_socache_have_versions()->Add();
+
+			SOID_t soid( m_mapSOCache[ idx ]->GetOwner() );
+			soid.ToMsgSOIDOwner( pMsg->mutable_soid() );
+
+			pMsg->set_version( m_mapSOCache[ idx ]->GetVersion() );
+		}
+
+		bSuccess = BSendMessage( msg );
+	}
+
+	if ( !bSuccess )
+	{
+		EmitInfo( SPEW_GC, 1, 1, "Failed to send Hello message to the GC.\n" );
+	}
+}
+
+void CGCClient::ProcessWelcomeMsg( const CMsgClientWelcome & msg )
+{
+	Msg( "ProcessWelcomeMsg: subbed caches size: uptodated = %d, outdated = %d\n",
+		msg.uptodate_subscribed_caches_size(), msg.outofdate_subscribed_caches_size()
+	);
+}
+
+void CGCClient::SetSimulateGCConnectionFailure( bool bForcedFailure )
+{
+	m_bSimulateGCConnectionFailure = bForcedFailure;
+	if ( bForcedFailure )
+	{
+		EmitInfo( SPEW_GC, 1, 1, "Simulated GC communications failure is active.\n" );
+		if ( m_nConnectionStatus != GCConnectionStatus_NO_STEAM )
+			m_nConnectionStatus = GCConnectionStatus_NO_SESSION;
+		m_timeReceivedConnectionStatus.SetToJobTime();
+	}
+	else
+	{
+		EmitInfo( SPEW_GC, 1, 1, "Simulated GC communications failure is not active.\n" );
 	}
 }
 
