@@ -47,6 +47,10 @@
 
 #include "itempickup_scaleform.h"
 
+#include "uicomponents/uicomponent_mypersona.h"
+#include "components/scaleformcomponent_common.h"
+#include "cs_gc_client.h"
+
 // SF ChromeHTML Test
 // #include "blog_scaleform.h"
 
@@ -304,7 +308,17 @@ void CCreateMainMenuScreenScaleform::Show( void )
 
 void CCreateMainMenuScreenScaleform::OnEvent( KeyValues *pEvent )
 {
-	/* Removed for partner depot */
+	if ( !V_stricmp( pEvent->GetName(), "GcLogonNotificationReceived" ))
+	{
+		static bool bOnce = false;
+		if ( !bOnce && FlashAPIIsValid() && m_bVisible )
+		{
+			bOnce = true;
+			// RE TODO: perfect world error
+		}
+	}
+
+    SF_COMPONENT_FORWARD_EVENT(pEvent->GetName());
 }
 
 void CCreateMainMenuScreenScaleform::Hide( void )
@@ -444,6 +458,21 @@ void CCreateMainMenuScreenScaleform::GetPreviousLevel( SCALEFORM_CALLBACK_ARGS_D
 	m_pScaleformUI->Params_SetResult( obj, m_iPreviousPlayerLevel );
 }
 
+extern CMsgGCCStrike15_v2_MatchmakingGC2ClientHello g_GC2ClientHello;
+
+void LoadCachedHelloDataDueToCommunicationTimeouts()
+{
+	if (g_GC2ClientHello.has_account_id())
+	{
+		ConfirmedReservationData_t confirmedReservationData;
+		if (confirmedReservationData.Load())
+		{
+			confirmedReservationData.SetPacketData(*g_GC2ClientHello.mutable_ongoingmatch());
+			UI_COMPONENT_BROADCAST_EVENT(GC, Hello);
+		}
+	}
+}
+
 void *g_pvPassedEngineArray = NULL; // this array gets passed from engine and should be reported to GC
 void CCreateMainMenuScreenScaleform::Tick()
 {
@@ -452,6 +481,7 @@ void CCreateMainMenuScreenScaleform::Tick()
 		( int( Plat_MSTime() - m_uiClientHelloRequestedTimestampMS ) > 6000 ) )
 	{
 		m_uiClientHelloRequestedTimestampMS = 0;
+		LoadCachedHelloDataDueToCommunicationTimeouts();
 	}
 
 	// Tick every half-second
@@ -460,7 +490,8 @@ void CCreateMainMenuScreenScaleform::Tick()
 	if ( ( dblTimeNow - s_dblTickTime ) > 0.5 )
 	{
 		s_dblTickTime = dblTimeNow;
-	/* Removed for partner depot */
+		SF_COMPONENT_NOTIFY_FLASH( Device, Tick );
+		/* Removed for partner depot */
 	}
 }
 
