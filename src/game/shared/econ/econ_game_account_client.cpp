@@ -8,6 +8,7 @@
 #include "cbase.h"
 #include "econ_game_account_client.h"
 #if defined( CLIENT_DLL )
+#include "gc_clientsystem.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -16,6 +17,8 @@
 
 uint32 CEconGameAccountClient::ComputeXpBonusFlagsNow() const
 {
-	/** Removed for partner depot **/
-	return 0;
+	uint32 bonus_xp_usedflags = Obj().bonus_xp_usedflags();
+	if ( GCClientSystem()->GCTimeFromLocalTime( CRTime::RTime32TimeCur() ) > Obj().bonus_xp_timestamp_refresh() )
+		bonus_xp_usedflags &= 0x1000003C;
+	return bonus_xp_usedflags;
 }
