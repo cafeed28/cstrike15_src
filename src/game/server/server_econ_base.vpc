@@ -48,6 +48,8 @@ $Project
 			$File	"$SRCDIR/game/shared/econ/econ_item_constants.h"
 			$File	"$SRCDIR/game/shared/econ/econ_item_schema.cpp"
 			$File	"$SRCDIR/game/shared/econ/econ_item_schema.h"
+			$File	"$SRCDIR/game/shared/econ/econ_item_tools.cpp"
+			$File	"$SRCDIR/game/shared/econ/econ_item_tools.h"
 			$File	"$SRCDIR/game/shared/econ/item_selection_criteria.cpp"
 			$File	"$SRCDIR/game/shared/econ/item_selection_criteria.h"
 

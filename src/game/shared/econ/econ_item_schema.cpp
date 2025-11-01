@@ -6,6 +6,7 @@
 
 #include "cbase.h"
 #include "econ_item_schema.h"
+#include "econ_item_tools.h"
 #include "tier1/fmtstr.h"
 #include "tier2/tier2.h"
 #include "filesystem.h"
@@ -55,8 +56,54 @@ CEconItemSchema & GEconItemSchema()
 #endif
 }
 
-const char * g_arrQuestVars[ k_EQuestVar_Last ] = { "" };
-	/** Removed for partner depot **/
+const char * g_arrQuestVars[ k_EQuestVar_Last ] = {
+	"act_kill_human",
+	"act_kill_chicken",
+	"act_kill_target",
+	"act_win_match",
+	"act_flashbang_enemy",
+	"act_pick_up_hostage",
+	"act_rescue_hostage",
+	"act_defuse_bomb",
+	"act_plant_bomb",
+	"act_damage",
+	"act_win_round",
+	"act_dm_bonus_points",
+	"act_income",
+	"act_cash",
+	"act_spend",
+	"act_pick_up_trophy",
+	"cond_damage_headshot",
+	"cond_damage_burn",
+	"cond_match_unique_weapon",
+	"cond_match_unique_weapon_count",
+	"cond_roundstate_pistolround",
+	"cond_roundstate_finalround",
+	"cond_roundstate_matchpoint",
+	"cond_roundstate_bomb_planted",
+	"cond_item_own",
+	"cond_item_borrowed",
+	"cond_item_borrowed_enemy",
+	"cond_item_borrowed_teammate",
+	"cond_item_borrowed_victim",
+	"cond_item_nondefault",
+	"cond_bullet_since_spawn",
+	"cond_player_rescuing",
+	"cond_player_zoomed",
+	"cond_player_blind",
+	"cond_player_terrorist",
+	"cond_player_ct",
+	"cond_life_killstreak_human",
+	"cond_life_killstreak_chicken",
+	"cond_match_rounds_won",
+	"cond_match_rounds_played",
+	"cond_victim_blind",
+	"cond_victim_zoomed",
+	"cond_victim_rescuing",
+	"cond_victim_terrorist",
+	"cond_victim_ct",
+	"cond_victim_reloading"
+};
 
 
 static void HelperValidateLocalizationStringToken( char const *pszToken )
@@ -865,7 +912,49 @@ void CEconQuestDefinition::PopulateQuestStringTokens( CEconQuestDefinition &ques
 						}
 					}
 					
-					/** Removed for partner depot **/
+					switch ( i )
+                    {
+                        case k_EQuestVar_Cond_ItemOwn:
+                            if ( !kvStringTokens.FindKey( "item_quality" ) )
+                                kvStringTokens.SetString( "item_quality", "#quest_condition_item_own" );
+                            break;
+                        case k_EQuestVar_Cond_ItemBorrowed:
+                            if ( !kvStringTokens.FindKey( "item_quality" ) )
+                                kvStringTokens.SetString( "item_quality", "#quest_condition_item_borrowed" );
+                            break;
+                        case k_EQuestVar_Cond_ItemBorrowedEnemy:
+                            if ( !kvStringTokens.FindKey( "item_quality" ) )
+                                kvStringTokens.SetString( "item_quality", "#quest_condition_item_borrowed_enemy" );
+                            break;
+                        case k_EQuestVar_Cond_ItemBorrowedTeammate:
+                            if ( !kvStringTokens.FindKey( "item_quality" ) )
+                                kvStringTokens.SetString( "item_quality", "#quest_condition_item_borrowed_teammate" );
+                            break;
+                        case k_EQuestVar_Cond_ItemBorrowedVictim:
+                            if ( !kvStringTokens.FindKey( "item_quality" ) )
+                                kvStringTokens.SetString( "item_quality", "#quest_condition_item_borrowed_victim" );
+                            break;
+                        case k_EQuestVar_Cond_ItemNonDefault:
+                            if ( !kvStringTokens.FindKey( "item_quality" ) )
+                                kvStringTokens.SetString( "item_quality", "#quest_condition_item_nondefault" );
+                            break;
+                        case k_EQuestVar_Cond_PlayerTerrorist:
+                            if ( !kvStringTokens.FindKey( "team" ) )
+                                kvStringTokens.SetString( "team", "#quest_team_terrorist" );
+                            break;
+                        case k_EQuestVar_Cond_PlayerCT:
+                            if ( !kvStringTokens.FindKey( "team" ) )
+                                kvStringTokens.SetString( "team", "#quest_team_ct" );
+                            break;
+                        case k_EQuestVar_Cond_VictimTerrorist:
+                            if ( !kvStringTokens.FindKey( "victim_team" ) )
+                                kvStringTokens.SetString( "victim_team", "#quest_team_terrorist" );
+                            break;
+                        case k_EQuestVar_Cond_VictimCT:
+                            if ( !kvStringTokens.FindKey( "victim_team" ) )
+                                kvStringTokens.SetString( "victim_team", "#quest_team_ct" );
+                            break;
+                    }
 
 					// note that we have at least one generic weapon if we use any item condition.
 					if ( V_stristr( kvSubKey->GetName( ), "cond_item" ) )
@@ -977,9 +1066,283 @@ void CEconQuestDefinition::PopulateQuestStringTokens( CEconQuestDefinition &ques
 		}
 		else if ( V_stristr( kvSubKey->GetName(), "map_" ) )
 		{
-
-			/** Removed for partner depot **/
-
+			bFound = true;
+            if ( !V_stricmp( kvSubKey->GetName(), "map_de_dust" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_dust" );
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_dust2" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_dust2" );
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_train" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_train");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_aztec" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_aztec");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_inferno" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_inferno");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_nuke" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_nuke");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_vertigo" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_vertigo");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_office" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_office");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_italy" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_italy");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_ar_baggage" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_ar_baggage");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_ar_baloney" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_ar_baloney");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_ar_monastery" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_ar_monastery");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_ar_shoots" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_ar_shoots");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_bank" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_bank");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_glass" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_glass");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_lake" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_lake");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_safehouse" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_safehouse");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_shorttrain" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_shorttrain");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_stmarc" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_stmarc");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_sugarcane" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_sugarcane");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_assault" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_assault");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_militia" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_militia");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_mirage" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_mirage");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_overpass" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_overpass");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_cbble" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_cbble");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_cache" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_cache");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_gwalior" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_gwalior");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_ali" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_ali");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_ruins" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_ruins");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_chinatown" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_chinatown");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_seaside" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_seaside");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_siege" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_siege");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_agency" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_agency");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_motel" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_motel");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_downtown" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_downtown");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_thunder" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_thunder");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_favela" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_favela");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_rush" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_rush");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_mist" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_mist");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_castle" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_castle");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_overgrown" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_overgrown");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_insertion" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_insertion");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_blackgold" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_blackgold");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_season" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_season");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_marquis" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_marquis");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_facade" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_facade");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_backalley" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_backalley");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_workout" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_workout");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_bazaar" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_bazaar");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_shortdust" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_shortdust");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_rails" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_rails");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_resort" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_resort");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_zoo" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_zoo");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_log" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_log");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_gd_crashsite" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_gd_crashsite");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_gd_lake" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_gd_lake");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_gd_bank" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_gd_bank");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_gd_cbble" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_gd_cbble");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_gd_sugarcane" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_gd_sugarcane");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_coop_cementplant" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_coop_cementplant");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_cs_cruise" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_cs_cruise");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_coast" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_coast");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_empire" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_empire");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_mikla" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_mikla");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_royal" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_royal");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_santorini" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_santorini");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_tulip" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_tulip");
+            }
+            else if ( !V_stricmp( kvSubKey->GetName(), "map_de_canals" ) )
+            {
+                kvStringTokens.SetString( "map", "#SFUI_Map_de_canals");
+            }
+			else
+			{
+				bFound = false;
+			}
 		}
 
 		// debug save
@@ -1072,7 +1435,52 @@ void CEconQuestDefinition::ZeroOutQuestExpressionVariables( CExpressionCalculato
 
 
 	// ACTIONS and CONDITIONS
-	/** Removed for partner depot **/
+	expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_KillHuman] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_KillChicken] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_KillTarget] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_WinMatch] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_FlashbangEnemy] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_PickupHostage] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_RescueHostage] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_DefuseBomb] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_PlantBomb] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_Damage] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_WinRound] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_DmBonusPoints] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_Income] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_Cash] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_Spend] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Act_PickupTrophy] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_Headshot] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_Burn] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_Match_UniqueWeapon] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_Match_UniqueWeaponCount] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_Roundstate_PistolRound] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_Roundstate_FinalRound] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_Roundstate_MatchPoint] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_Roundstate_BombPlanted] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_ItemOwn] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_ItemBorrowed] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_ItemBorrowedEnemy] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_ItemBorrowedTeammate] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_ItemBorrowedVictim] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_ItemNonDefault] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_BulletSinceSpawn] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_PlayerRescuing] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_PlayerZoomed] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_PlayerBlind] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_PlayerTerrorist] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_PlayerCT] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_LifeKillstreakHuman] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_LifeKillstreakChicken] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_MatchRoundsWon] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_MatchRoundsPlayed] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_VictimBlind] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_VictimZoomed] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_VictimRescuing] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_VictimTerrorist] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_VictimCT] ), 0 );
+    expr.SetVariable( CFmtStr( "%%%s%%", g_arrQuestVars[k_EQuestVar_Cond_VictimReloading] ), 0 );
 
 	// WEAPON TYPES
 	for ( int i = 0; i < LOADOUT_POSITION_COUNT; i++ )
@@ -1111,8 +1519,73 @@ void CEconQuestDefinition::ZeroOutQuestExpressionVariables( CExpressionCalculato
 	}
 
 	// MAPS
-	/** Removed for partner depot **/
-
+	expr.SetVariable( "%map_de_dust%", 0 );
+    expr.SetVariable( "%map_de_dust2%", 0 );
+    expr.SetVariable( "%map_de_train%", 0 );
+    expr.SetVariable( "%map_de_aztec%", 0 );
+    expr.SetVariable( "%map_de_inferno%", 0 );
+    expr.SetVariable( "%map_de_nuke%", 0 );
+    expr.SetVariable( "%map_de_vertigo%", 0 );
+    expr.SetVariable( "%map_cs_office%", 0 );
+    expr.SetVariable( "%map_cs_italy%", 0 );
+    expr.SetVariable( "%map_ar_baggage%", 0 );
+    expr.SetVariable( "%map_ar_baloney%", 0 );
+    expr.SetVariable( "%map_ar_monastery%", 0 );
+    expr.SetVariable( "%map_ar_shoots%", 0 );
+    expr.SetVariable( "%map_de_bank%", 0 );
+    expr.SetVariable( "%map_de_glass%", 0 );
+    expr.SetVariable( "%map_de_lake%", 0 );
+    expr.SetVariable( "%map_de_safehouse%", 0 );
+    expr.SetVariable( "%map_de_shorttrain%", 0 );
+    expr.SetVariable( "%map_de_stmarc%", 0 );
+    expr.SetVariable( "%map_de_sugarcane%", 0 );
+    expr.SetVariable( "%map_cs_assault%", 0 );
+    expr.SetVariable( "%map_cs_militia%", 0 );
+    expr.SetVariable( "%map_de_mirage%", 0 );
+    expr.SetVariable( "%map_de_overpass%", 0 );
+    expr.SetVariable( "%map_de_cbble%", 0 );
+    expr.SetVariable( "%map_de_gwalior%", 0 );
+    expr.SetVariable( "%map_de_ali%", 0 );
+    expr.SetVariable( "%map_de_ruins%", 0 );
+    expr.SetVariable( "%map_de_chinatown%", 0 );
+    expr.SetVariable( "%map_de_seaside%", 0 );
+    expr.SetVariable( "%map_cs_siege%", 0 );
+    expr.SetVariable( "%map_cs_agency%", 0 );
+    expr.SetVariable( "%map_cs_motel%", 0 );
+    expr.SetVariable( "%map_cs_downtown%", 0 );
+    expr.SetVariable( "%map_cs_thunder%", 0 );
+    expr.SetVariable( "%map_de_favela%", 0 );
+    expr.SetVariable( "%map_cs_rush%", 0 );
+    expr.SetVariable( "%map_de_mist%", 0 );
+    expr.SetVariable( "%map_de_castle%", 0 );
+    expr.SetVariable( "%map_de_overgrown%", 0 );
+    expr.SetVariable( "%map_cs_insertion%", 0 );
+    expr.SetVariable( "%map_de_blackgold%", 0 );
+    expr.SetVariable( "%map_de_season%", 0 );
+    expr.SetVariable( "%map_de_marquis%", 0 );
+    expr.SetVariable( "%map_de_facade%", 0 );
+    expr.SetVariable( "%map_cs_backalley%", 0 );
+    expr.SetVariable( "%map_cs_workout%", 0 );
+    expr.SetVariable( "%map_de_bazaar%", 0 );
+    expr.SetVariable( "%map_de_shortdust%", 0 );
+    expr.SetVariable( "%map_de_rails%", 0 );
+    expr.SetVariable( "%map_de_resort%", 0 );
+    expr.SetVariable( "%map_de_zoo%", 0 );
+    expr.SetVariable( "%map_de_log%", 0 );
+    expr.SetVariable( "%map_gd_crashsite%", 0 );
+    expr.SetVariable( "%map_gd_lake%", 0 );
+    expr.SetVariable( "%map_gd_bank%", 0 );
+    expr.SetVariable( "%map_gd_cbble%", 0 );
+    expr.SetVariable( "%map_gd_sugarcane%", 0 );
+    expr.SetVariable( "%map_coop_cementplant%", 0 );
+    expr.SetVariable( "%map_cs_cruise%", 0 );
+    expr.SetVariable( "%map_de_coast%", 0 );
+    expr.SetVariable( "%map_de_empire%", 0 );
+    expr.SetVariable( "%map_de_mikla%", 0 );
+    expr.SetVariable( "%map_de_royal%", 0 );
+    expr.SetVariable( "%map_de_santorini%", 0 );
+    expr.SetVariable( "%map_de_tulip%", 0 );
+    expr.SetVariable( "%map_de_canals%", 0 );
 }
 
 
@@ -5660,7 +6133,174 @@ CEconItemSchema::CEconItemSchema( )
 //-----------------------------------------------------------------------------
 IEconTool *CEconItemSchema::CreateEconToolImpl( const char *pszToolType, const char *pszUseString, const char *pszUsageRestriction, item_capabilities_t unCapabilities, KeyValues *pUsageKV )
 {
-	return nullptr;
+	// RE TODO: recheck all "Error checking" conditions
+	// RE TODO: reverse all commented and check all existing classes
+	if ( pszToolType )
+	{
+		if ( !V_stricmp( pszToolType, "duel_minigame" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( unCapabilities != ITEM_CAP_NONE )		return NULL;
+			if ( pUsageKV )								return NULL;
+				
+			return new CEconTool_DuelingMinigame( pszToolType, pszUseString );
+		}
+
+		if ( !V_stricmp( pszToolType, "noise_maker" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( unCapabilities != ITEM_CAP_NONE )		return NULL;
+			if ( pUsageKV )								return NULL;
+
+			return new CEconTool_Noisemaker( pszToolType, pszUseString );
+		}
+
+		if ( !V_stricmp( pszToolType, "wrapped_gift" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+
+			return new CEconTool_WrappedGift( pszToolType, pszUseString, unCapabilities, pUsageKV );
+		}
+
+		if ( !V_stricmp( pszToolType, "backpack_expander" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( unCapabilities != ITEM_CAP_NONE )		return NULL;
+
+			return new CEconTool_BackpackExpander( pszToolType, pszUseString, pUsageKV );
+		}
+
+		if ( !V_stricmp( pszToolType, "collection" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+
+			//return new CEconTool_Collection( pszToolType, pszUseString, pUsageKV );
+		}
+
+		if ( !V_stricmp( pszToolType, "gift" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( unCapabilities != ITEM_CAP_NONE )		return NULL;
+
+			return new CEconTool_Gift( pszToolType, pszUseString, pUsageKV );
+		}
+
+		if ( !V_stricmp( pszToolType, "paint_can" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			return new CEconTool_PaintCan( pszToolType, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "paint_kit" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			//return new CEconTool_PaintKit( pszToolType, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "recipe" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			//return new CEconTool_Recipe( pszToolType, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "name" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			return new CEconTool_NameTag( pszToolType, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "stattrak_swap" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			//return new CEconTool_StatTrakSwap( pszToolType, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "desc" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			return new CEconTool_DescTag( pszToolType, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "sticker" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			//return new CEconTool_Sticker( pszToolType, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "decoder_ring" ) || !V_stricmp( pszToolType, "supply_crate" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pUsageKV )								return NULL;
+
+			return new CEconTool_CrateKey( pszToolType, pszUsageRestriction, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "customize_texture_item" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			return new CEconTool_CustomizeTexture( pszToolType, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "gift_wrap" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			//return new CEconTool_GiftWrap( pszToolType, pszUseString, unCapabilities, pUsageKV );
+		}
+
+		if ( !V_stricmp( pszToolType, "wedding_ring" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( pUsageKV )								return NULL;
+
+			return new CEconTool_WeddingRing( pszToolType, pszUseString, unCapabilities );
+		}
+
+		if ( !V_stricmp( pszToolType, "season_pass" ) )
+		{
+			// Error checking -- make sure we aren't setting properties in the schema that we don't support.
+			if ( pszUsageRestriction )					return NULL;
+			if ( unCapabilities != ITEM_CAP_NONE )		return NULL;
+			
+			//return new CEconTool_SeasonPass( pszToolType, pszUseString, unCapabilities, pUsageKV );
+		}
+	}
+
+	// Default behavior.
+	return new CEconTool_Default( pszToolType, pszUseString, pszUsageRestriction, unCapabilities );
 }
 
 //-----------------------------------------------------------------------------
