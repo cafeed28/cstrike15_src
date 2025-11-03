@@ -818,6 +818,51 @@ void DisplayBoneSetupEnts()
 #endif
 }
 
+#if defined( INCLUDE_SCALEFORM )
+class CScaleformSlotInitControllerClientImpl : public IScaleformSlotInitController
+{
+public:
+	// A new slot has been created and InitSlot almost finished, perform final configuration
+	virtual void ConfigureNewSlotPostInit( int slot )
+	{
+		/*
+		FOR_EACH_VEC(m_arrScaleformComponents, i)
+		{
+			IScaleformComponentGlobalInstanceBase* pComponent = m_arrScaleformComponents[i];
+			pComponent->InstallScaleformBindings( slot );
+		}
+		*/
+		FOR_EACH_VEC( GameUI().GetUiComponents(), i )
+		{
+			IUiComponentGlobalInstanceBase* pComponent = GameUI().GetUiComponents()[i];
+			pComponent->InstallScaleformBindings( slot );
+		}
+	};
+
+	// Notification to external systems that a file was loaded by Scaleform libraries
+	virtual bool OnFileLoadedByScaleform( char const *pszFilename, void *pvBuffer, int numBytesLoaded )
+	{
+		// RE TODO: this verifies checksums of swf files
+		return true;
+	}
+
+	virtual const void * GetStringUserData( const char * pchStringTableName, const char * pchKeyName, int * pLength )
+	{
+		return NULL;
+	}
+
+	virtual void PassSignaturesArray( void *pvArray )
+	{
+		// RE TODO: g_pvPassedEngineArray = pvArray;
+	}
+
+private:
+	// RE TODO: CUtlVector< IScaleformComponentGlobalInstanceBase > m_arrScaleformComponents;
+}
+g_CScaleformSlotInitControllerClientImpl;
+IScaleformSlotInitController *g_pIScaleformSlotInitControllerClientImpl = &g_CScaleformSlotInitControllerClientImpl;
+#endif
+
 
 //-----------------------------------------------------------------------------
 // Purpose: engine to client .dll interface
@@ -4807,8 +4852,7 @@ bool CHLClient::ShouldSkipEvidencePlayback( CDemoPlaybackParameters_t const *pPl
 // Scaleform slot controller
 IScaleformSlotInitController * CHLClient::GetScaleformSlotInitController()
 {
-	/* Removed for partner depot */
-	return nullptr;
+	return g_pIScaleformSlotInitControllerClientImpl;
 }
 
 bool CHLClient::IsConnectedUserInfoChangeAllowed( IConVar *pCvar )

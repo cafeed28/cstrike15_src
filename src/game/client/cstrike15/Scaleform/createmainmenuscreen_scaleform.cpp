@@ -105,6 +105,11 @@ void CCreateMainMenuScreenScaleform::LoadDialog( void )
 		{
 			ScaleformReleaseFullScreenAndCursor( g_pScaleformUI );
 
+			const char g_szDefaultScaleformMovieName[] = "resource/flash/MainUIRootMovie.swf";
+			const char g_szDefaultScaleformCursorName[] = "resource/flash/Cursor.swf";
+			extern IScaleformSlotInitController* g_pIScaleformSlotInitControllerClientImpl;
+			ScaleformInitFullScreenAndCursor( g_pScaleformUI, g_szDefaultScaleformMovieName, g_szDefaultScaleformCursorName, g_pIScaleformSlotInitControllerClientImpl );
+
 			// Force the UI tint convar to reset now, so the main menu picks it up
 			static ConVarRef sf_ui_tint( "sf_ui_tint" );
 			int actualValue = sf_ui_tint.GetInt();
