@@ -128,6 +128,8 @@ class IMatchExtPortal2 *g_pMatchExtPortal2 = &g_MatchExtPortal2;
 
 #include "uicomponents/uicomponent_friendslist.h"
 #include "uicomponents/uicomponent_mypersona.h"
+#include "uicomponents/uicomponent_competitivematch.h"
+#include "uicomponents/uicomponent_gametypes.h"
 
 typedef CBaseModPanel UI_BASEMOD_PANEL_CLASS;
 inline UI_BASEMOD_PANEL_CLASS & GetUiBaseModPanelClass() { return *BasePanel(); }
@@ -355,9 +357,9 @@ void CGameUI::Initialize( CreateInterfaceFn factory )
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_MatchList::GetInstance());
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_Predictions::GetInstance());
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_Fantasy::GetInstance());
-	//m_arrUiComponents.InsertBefore(0, CUiComponent_CompetitiveMatch::GetInstance());
+	m_arrUiComponents.InsertBefore(0, CUiComponent_CompetitiveMatch::GetInstance());
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_DataGraph::GetInstance());
-	//m_arrUiComponents.InsertBefore(0, CUiComponent_GameTypes::GetInstance());
+	m_arrUiComponents.InsertBefore(0, CUiComponent_GameTypes::GetInstance());
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_GlobalGame::GetInstance());
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_Leaderboards::GetInstance());
 	//m_arrUiComponents.InsertBefore(0, CUiComponent_MatchDraft::GetInstance());
