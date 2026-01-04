@@ -2797,7 +2797,7 @@ AcquireResult::Type CCSPlayer::CanAcquire( CSWeaponID weaponId, AcquireMethod::T
 			if ( pWeapon != NULL && pWeapon->IsKindOf( WEAPONTYPE_GRENADE ) )
 			{
 				int nAmmoType = pWeapon->GetPrimaryAmmoType();
-				if( nAmmoType != -1 )
+				if( nAmmoType != -1 && !IsAmmoType( nAmmoType, AMMO_TYPE_SNOWBALL ) )
 				{
 					allGrenadesCarried += GetAmmoCount( nAmmoType );
 				}

@@ -246,6 +246,9 @@ $Project "Client (CSGO)"
 					}
 				}
 			}
+			
+			$File	"$SRCDIR\game\shared\cstrike15\snowball_pile.cpp"
+			$File	"$SRCDIR\game\shared\cstrike15\snowball_pile.h"
 
 			$Folder "GameUI - Embedded"
 			{
@@ -495,6 +498,8 @@ $Project "Client (CSGO)"
 				$File	"$SRCDIR\game\shared\cstrike15\weapon_decoy.cpp"
 				$File	"$SRCDIR\game\shared\cstrike15\weapon_sensorgrenade.h"
 				$File	"$SRCDIR\game\shared\cstrike15\weapon_sensorgrenade.cpp"
+				$File	"$SRCDIR\game\shared\cstrike15\weapon_snowball.cpp"
+				$File	"$SRCDIR\game\shared\cstrike15\weapon_snowball.h"
 
 				$File	"$SRCDIR\game\shared\cstrike15\weapon_nova.cpp"
 				$File	"$SRCDIR\game\shared\cstrike15\molotov_projectile.cpp"
@@ -510,6 +515,8 @@ $Project "Client (CSGO)"
 				$File	"$SRCDIR\game\shared\cstrike15\item_healthshot.h"
 				$File	"$SRCDIR\game\shared\cstrike15\sensorgrenade_projectile.cpp"
 				$File	"$SRCDIR\game\shared\cstrike15\sensorgrenade_projectile.h"
+				$File	"$SRCDIR\game\shared\cstrike15\snowball_projectile.cpp"
+				$File	"$SRCDIR\game\shared\cstrike15\snowball_projectile.h"
 			}
 			
 			$Folder "Effects"

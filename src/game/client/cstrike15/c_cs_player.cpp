@@ -1756,6 +1756,7 @@ C_CSPlayer::C_CSPlayer() :
 
 	ListenForGameEvent( "add_bullet_hit_marker" );
 	ListenForGameEvent( "assassination_target_killed" );
+	ListenForGameEvent( "snowball_hit_player_face" );
 
 
 	//m_isCurrentGunGameLeader = false;
@@ -2685,7 +2686,12 @@ void C_CSPlayer::FireGameEvent( IGameEvent *event )
 		{
 			// if we aren't playing the sound on the server, play a "silent" version on the client
 			if ( event->GetBool( "silent" ) )
-				EmitSound( "Player.PickupWeaponSilent" );
+			{
+				if ( Q_strcmp( event->GetString( "item" ), "snowball" ) == 0 )
+					EmitSound( "Player.SnowballPickup" );
+				else
+					EmitSound( "Player.PickupWeaponSilent" );
+			}
 
 			STEAMWORKS_TESTSECRET_AMORTIZE( 67 );
 		}
@@ -2938,6 +2944,10 @@ void C_CSPlayer::FireGameEvent( IGameEvent *event )
 				( ( SFHudInfoPanel * ) pElement )->SetPriorityHintText( szBuf );
 			}
 		}
+	}
+	else if ( Q_strcmp( "snowball_hit_player_face", name ) == 0 )
+	{
+		DispatchParticleEffect( "snow_hit_player_screeneffect", GetAbsOrigin(), GetAbsAngles(), PATTACH_EYES_FOLLOW, this, -1 );
 	}
 	else if ( Q_strcmp( "add_bullet_hit_marker", name ) == 0 )
 	{

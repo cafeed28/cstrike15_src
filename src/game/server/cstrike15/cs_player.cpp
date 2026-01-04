@@ -6354,6 +6354,16 @@ void CCSPlayer::GiveDefuser( bool bPickedUp /* = false */ )
 	RecalculateCurrentEquipmentValue();
 }
 
+// player blinded by a snowball
+void CCSPlayer::SnowBlind( bool unk, float holdTime, float fadeTime, float startingAlpha )
+{
+	Blind( holdTime, fadeTime, startingAlpha );
+	if ( unk )
+	{
+		m_PlayerAnimStateCSGO->m_flFlashedAmountEaseOutStart = gpGlobals->curtime + 0.25;
+		m_PlayerAnimStateCSGO->m_flFlashedAmountEaseOutEnd = gpGlobals->curtime + 1.5;
+	}
+}
 
 // player blinded by a flashbang grenade
 void CCSPlayer::Blind( float holdTime, float fadeTime, float startingAlpha )

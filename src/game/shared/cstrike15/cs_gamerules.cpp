@@ -1586,7 +1586,7 @@ ConVar ammo_grenade_limit_default( "ammo_grenade_limit_default", "1", FCVAR_REPL
 ConVar ammo_grenade_limit_flashbang( "ammo_grenade_limit_flashbang", "1", FCVAR_REPLICATED | FCVAR_RELEASE );
 ConVar ammo_grenade_limit_total( "ammo_grenade_limit_total", "3", FCVAR_REPLICATED | FCVAR_RELEASE );
 
-ConVar ammo_item_limit_healthshot( "ammo_item_limit_healthshot", "4", FCVAR_REPLICATED | FCVAR_RELEASE );
+ConVar ammo_grenade_limit_snowballs( "ammo_grenade_limit_snowballs", "3", FCVAR_REPLICATED | FCVAR_RELEASE );
 
 ConVar ammo_50AE_impulse( "ammo_50AE_impulse", "2400", FCVAR_REPLICATED, "You must enable tweaking via tweak_ammo_impulses to use this value." );
 ConVar ammo_762mm_impulse( "ammo_762mm_impulse", "2400", FCVAR_REPLICATED, "You must enable tweaking via tweak_ammo_impulses to use this value." );
@@ -16037,8 +16037,9 @@ CAmmoDef* GetAmmoDef()
         ammoDef.AddAmmoType( AMMO_TYPE_DECOY,			0,			TRACER_NONE, 0, 0, "ammo_grenade_limit_default", 0, 0, 0 );
         ammoDef.AddAmmoType( AMMO_TYPE_TASERCHARGE,		DMG_SHOCK,	TRACER_BEAM, 0, 0, 0, 0, 0, 0 );
 		ammoDef.AddAmmoType( BULLET_PLAYER_357SIG_P250,	DMG_BULLET, TRACER_LINE, 0, 0, "ammo_357sig_p250_max",	"ammo_357sig_impulse", 0, 4, 8 );
-		ammoDef.AddAmmoType( AMMO_TYPE_HEALTHSHOT, 0, TRACER_LINE, 0, 0, "ammo_item_limit_healthshot", 0, 0, 0 );
-		ammoDef.AddAmmoType( AMMO_TYPE_TAGRENADE,	0,			TRACER_NONE, 0, 0, "ammo_grenade_limit_default", 0, 0, 0 );
+		ammoDef.AddAmmoType( AMMO_TYPE_HEALTHSHOT,		0,			TRACER_LINE, 0, 0, "ammo_item_limit_healthshot", 0, 0, 0 );
+		ammoDef.AddAmmoType( AMMO_TYPE_TAGRENADE,		0,			TRACER_NONE, 0, 0, "ammo_grenade_limit_default", 0, 0, 0 );
+		ammoDef.AddAmmoType( AMMO_TYPE_SNOWBALL,		DMG_NEVERGIB,	TRACER_NONE, 0, 0, "ammo_grenade_limit_snowballs", 0, 0, 8 );
 
         //Adrian: I set all the prices to 0 just so the rest of the buy code works
         //This should be revisited.

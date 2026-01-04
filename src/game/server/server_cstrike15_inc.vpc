@@ -169,6 +169,10 @@ $Project $SPROJ
 
 			$File	"$SRCDIR\game\shared\cstrike15\sensorgrenade_projectile.cpp"
 			$File	"$SRCDIR\game\shared\cstrike15\sensorgrenade_projectile.h"
+			$File	"$SRCDIR\game\shared\cstrike15\snowball_projectile.cpp"
+			$File	"$SRCDIR\game\shared\cstrike15\snowball_projectile.h"
+			$File	"$SRCDIR\game\shared\cstrike15\snowball_pile.cpp"
+			$File	"$SRCDIR\game\shared\cstrike15\snowball_pile.h"
 			$File   "$SRVSRCDIR\cstrike15\cs_voteissues.h"
 			$File   "$SRVSRCDIR\cstrike15\cs_voteissues.cpp"			
 
@@ -236,6 +240,8 @@ $Project $SPROJ
 				$File	"$SRCDIR\game\shared\cstrike15\weapon_decoy.cpp"
 				$File	"$SRCDIR\game\shared\cstrike15\weapon_sensorgrenade.h"
 				$File	"$SRCDIR\game\shared\cstrike15\weapon_sensorgrenade.cpp"
+				$File	"$SRCDIR\game\shared\cstrike15\weapon_snowball.h"
+				$File	"$SRCDIR\game\shared\cstrike15\weapon_snowball.cpp"
 
 				$File	"$SRCDIR\game\shared\cstrike15\weapon_nova.cpp"
 

@@ -120,6 +120,7 @@ enum CSWeaponID
 	EQUIPMENT_MAX,
 
 	WEAPON_HEALTHSHOT,
+	WEAPON_SNOWBALL,
 
 	WEAPON_MAX = EQUIPMENT_MAX,		// number of weapons weapon index
 };
