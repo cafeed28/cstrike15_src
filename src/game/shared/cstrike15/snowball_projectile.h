@@ -45,6 +45,8 @@ public:
 	virtual void Precache( void );
 	virtual void Detonate( void );
 	virtual void BounceTouch( CBaseEntity *other );
+	
+	void	InputSetTimer( inputdata_t &inputdata );
 
 	virtual GrenadeType_t GetGrenadeType( void ) { return GRENADE_TYPE_SENSOR; }
 

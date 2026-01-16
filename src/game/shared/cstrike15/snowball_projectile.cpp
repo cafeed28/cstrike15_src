@@ -60,6 +60,13 @@ IMPLEMENT_SERVERCLASS_ST( CSnowballProjectile, DT_SnowballProjectile )
 END_SEND_TABLE()
 
 BEGIN_DATADESC( CSnowballProjectile )
+	
+	// Fields
+	//DEFINE_KEYFIELD( m_flTimeToDetonate, FIELD_FLOAT, "TimeToDetonate" ),
+
+	// Inputs
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTimer", InputSetTimer ),
+
 END_DATADESC()
 
 void RadiusSnowFlash(
@@ -216,9 +223,18 @@ CSnowballProjectile* CSnowballProjectile::Create(
 	return pGrenade;
 }
 
+CSnowballProjectile::CSnowballProjectile()
+{
+	// m_flSmth1_NetVar = 1.0; // 0x3F800000
+	m_flTimeToDetonate = 10.0;
+	m_numOpponentsHit = m_numTeammatesHit = 0;
+}
+
 void CSnowballProjectile::Spawn( void )
 {
 	SetModel( GRENADE_MODEL );
+
+	SetDetonateTimerLength( m_flTimeToDetonate );
 
 	SetTouch( &CSnowballProjectile::BounceTouch );
 
@@ -234,13 +250,6 @@ void CSnowballProjectile::Spawn( void )
 	BaseClass::Spawn();
 
 	SetBodygroupPreset( "thrown" );
-}
-
-CSnowballProjectile::CSnowballProjectile()
-{
-	// m_flSmth1_NetVar = 1.0; // 0x3F800000
-	// m_flSmth2 = 10.0; // 0x41200000
-	m_numOpponentsHit = m_numTeammatesHit = 0;
 }
 
 void CSnowballProjectile::Precache( void )
@@ -332,6 +341,12 @@ void CSnowballProjectile::BounceTouch( CBaseEntity *other )
 	}
 
 	Detonate();
+}
+
+void CSnowballProjectile::InputSetTimer( inputdata_t &inputdata )
+{
+	m_flTimeToDetonate = inputdata.value.Float();
+	SetDetonateTimerLength( m_flTimeToDetonate );
 }
 
 #endif // GAME_DLL
