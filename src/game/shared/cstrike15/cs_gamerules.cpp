@@ -85,6 +85,7 @@
 	#include "world.h"
 	#include "items.h"
 	#include "Effects/chicken.h"
+	#include "snowball_pile.h"
 #endif
 
 #include "gametypes.h"
@@ -8189,6 +8190,24 @@ static bool Helper_CheckFieldAppliesToTeam( char const *szField, int nTeam )
 				pManager->SetRoundReset();
 				// we do it here after we set a bunch or things for the map, 
 				// because coop might want a certain map type even if they aren't spawned right now
+			}
+		}
+		else if ( /*EconHolidays_IsHolidayActive( kHoliday_Christmas ) &&*/ !IsPlayingGunGame() && !IsPlayingAnyCompetitiveStrictRuleset() /*&& !IsPlayingSurvival()*/ )
+		{
+			for ( int team = TEAM_TERRORIST; team < TEAM_MAXCOUNT; team++ )
+			{
+				CBaseEntity* pSpot = GetNextSpawnpoint( team );
+				if ( !pSpot ) continue;
+
+				CSnowballPile *pSnowballPile = dynamic_cast< CSnowballPile* >( CreateEntityByName( "ent_snowball_pile" ) );
+				if ( !pSnowballPile ) continue;
+
+				pSnowballPile->KeyValue( "model", "models/props/cs_office/Snowman_body.mdl" );
+
+				Vector vecPos = DropToGround( pSpot, pSpot->GetAbsOrigin(), Vector( -2, -2, 0 ), Vector( 2, 2, 2 ) );
+				pSnowballPile->SetAbsOrigin( vecPos );
+				pSnowballPile->SetAbsAngles( pSpot->GetAbsAngles() );
+				pSnowballPile->Spawn( );
 			}
 		}
 
