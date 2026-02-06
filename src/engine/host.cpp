@@ -5362,13 +5362,21 @@ public:
 	// A new slot has been created and InitSlot almost finished, perform final configuration
 	virtual void ConfigureNewSlotPostInit( int slot )
 	{
+		g_ClientDLL->GetScaleformSlotInitController()->ConfigureNewSlotPostInit( slot );
 	};
 
 	// Notification to external systems that a file was loaded by Scaleform libraries
 	virtual bool OnFileLoadedByScaleform( char const *pszFilename, void *pvBuffer, int numBytesLoaded )
 	{
-		Host_DisallowSecureServers();
-		return false;
+		if ( g_ClientDLL->GetScaleformSlotInitController()->OnFileLoadedByScaleform( pszFilename, pvBuffer, numBytesLoaded ) )
+		{
+			return true;
+		}
+		else
+		{
+			Host_DisallowSecureServers();
+			return false;
+		}
 	}
 
 	virtual const void * GetStringUserData( const char * pchStringTableName, const char * pchKeyName, int * pLength )
