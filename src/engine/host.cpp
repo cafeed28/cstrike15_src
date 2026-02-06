@@ -5689,7 +5689,12 @@ void Host_Init( bool bDedicated )
 #endif
 	}
 
-	if ( IsPC() )
+	if ( IsDebug() )
+	{
+		// in case there is some release binaries that have FCVAR_DEVELOPMENTONLY cvars
+		ConVarUtilities->EnableDevCvars();
+	}
+	else if ( IsPC() )
 	{
 #if !defined(NO_STEAM)
 		// on PC, enable FCVAR_DEVELOPMENTONLY cvars if we're logged into beta or dev universes.  They remain hidden & disabled otherwise.
