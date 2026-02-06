@@ -616,7 +616,11 @@ int __cdecl _set_sbh_threshold( size_t )
 
 int _heapchk()
 {
+#if USE_MEM_DEBUG
 	return g_pMemAlloc->heapchk();
+#else
+	return _HEAPOK;
+#endif
 }
 
 int _heapmin()
