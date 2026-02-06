@@ -49,6 +49,9 @@ obj*/
 *.pb.cc
 *.pb.h
 
+# tier0 Message Compiler generated files
+src/tier0/valveetwproviderEvents*
+
 # VScript Squirell generated files
 init_nut.h
 
