@@ -12380,7 +12380,73 @@ void CCSPlayer::StockPlayerAmmo( CBaseCombatWeapon *pNewWeapon )
 
 void CCSPlayer::FindMatchingWeaponsForTeamLoadout( const char *pchName, int nTeam, bool bMustBeTeamSpecific, CUtlVector< CEconItemView* > &matchingWeapons )
 {
-	/** Removed for partner depot **/
+	const char *weaponName = pchName;
+    CEconItemDefinition *itemDef = GEconItemSchema().GetItemDefinitionByName( pchName );
+    if ( itemDef )
+    {
+        const char *slotName = itemDef->GetRawDefinition()->GetString( "item_slot" );
+        if ( slotName && slotName[0] && !V_stricmp( slotName, "melee" ) )
+        {
+            if ( nTeam == TEAM_TERRORIST )
+            {
+                weaponName = "weapon_knife_t";
+            }
+            else
+            {
+                weaponName = "weapon_knife";
+            }
+        }
+    }
+
+    bool bIsGunGameDM = true;
+    if ( CSGameRules() && CSGameRules()->IsPlayingGunGame() )
+	{
+        bIsGunGameDM = CSGameRules()->IsPlayingGunGameDeathmatch();
+    }
+
+    CEconItemView *pBaseItemForSlot = NULL;
+    int slot = LOADOUT_POSITION_MELEE;
+
+    while ( true )
+    {
+        pBaseItemForSlot = CSInventoryManager()->GetBaseItemForTeam( nTeam, slot );
+        const GameItemDefinition_t *baseItemDef = pBaseItemForSlot->GetItemDefinition();
+        const char *defName = baseItemDef->GetDefinitionName();
+        if ( !V_strcmp( baseItemDef->GetItemBaseName(), weaponName ) )
+            break;
+
+        if ( ++slot >= 3 )
+        {
+            // go through the slots in loadout_positions_t
+            for ( int slotItr = LOADOUT_POSITION_SECONDARY0; slotItr <= LOADOUT_POSITION_HEAVY5; slotItr++ )
+            {
+                CEconItemView *slotItrItem = m_Inventory.GetItemInLoadout( nTeam, slotItr );
+                if ( !slotItrItem || !slotItrItem->IsValid() )
+                    continue;
+                if ( V_strcmp( slotItrItem->GetItemDefinition()->GetItemBaseName(), weaponName ) )
+                    continue;
+
+                if ( !bMustBeTeamSpecific || ( slotItrItem->GetStaticData()->GetUsedByTeam() == nTeam || slotItrItem->GetStaticData()->GetUsedByTeam() == TEAM_UNASSIGNED ) )
+                {
+                    Msg("%s is valid weapon for \"%s\" in slot %d\n", defName, weaponName, slotItr );
+                    matchingWeapons.AddToTail( slotItrItem );
+                }
+            }
+            return;
+        }
+    }
+
+    CEconItemView *slotItem = m_Inventory.GetItemInLoadout( nTeam, slot );
+    if ( slotItem && slotItem->IsValid() && slotItem != pBaseItemForSlot )
+    {
+        if ( ( bIsGunGameDM || slot < 2 ) || !V_strcmp( slotItem->GetItemDefinition()->GetDefinitionName(), weaponName ) )
+        {
+            if ( !bMustBeTeamSpecific || ( slotItem->GetStaticData()->GetUsedByTeam() == nTeam || slotItem->GetStaticData()->GetUsedByTeam() == TEAM_UNASSIGNED ) )
+            {
+                matchingWeapons.AddToTail( slotItem );
+            }
+        }
+    }
 }
 
 CBaseEntity	*CCSPlayer::GiveNamedItem( const char *pchName, int iSubType /*= 0*/, CEconItemView *pScriptItem /*= NULL*/, bool bForce /*= false*/ )
