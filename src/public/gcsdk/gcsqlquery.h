@@ -1,4 +1,4 @@
-//========= Copyright ©, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -13,6 +13,7 @@
 
 #include "gamecoordinator/igcsqlquery.h"
 #include "refcount.h"
+#include "bufferpool.h"
 #include "tier0/memdbgon.h"
 
 namespace GCSDK
@@ -31,6 +32,8 @@ class CGCSQLQuery
 public:
 	CGCSQLQuery();
 	virtual ~CGCSQLQuery();
+
+	static CBufferPool &GetBufferPool();
 
 	void SetCommand( const char *pchCommand ) { m_sCommand = pchCommand; }
 

@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2010, Valve Corporation, All rights reserved. =======
+//====== Copyright ï¿½ 1996-2010, Valve Corporation, All rights reserved. =======
 //
 // Purpose: HTTP related enums and objects, stuff that both clients and server use should go here
 //
@@ -13,6 +13,7 @@
 #include "steam/steamhttpenums.h"
 #include "tier1/keyvalues.h"
 #include "tier1/netadr.h"
+#include "gcsdk/bufferpool.h"
 
 class CMsgHttpRequest;
 class CMsgHttpResponse;
@@ -397,6 +398,8 @@ public:
 #endif // DBGFLAG_VALIDATE
 
 protected:
+	static CBufferPool &GetBufferPool();
+
 	EHTTPStatusCode m_eStatusCode;
 	CUtlBuffer m_bufBody;
 	KeyValues *m_pkvResponseHeaders;

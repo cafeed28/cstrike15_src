@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2010, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2010, Valve LLC, All rights reserved. ============
 //
 // Purpose: Header for CWebAPIResponse objects
 //
@@ -10,6 +10,7 @@
 #pragma once
 #endif
 
+#include "bufferpool.h"
 #include "tier0/memdbgon.h"
 
 namespace GCSDK
@@ -106,6 +107,11 @@ public:
 	CWebAPIValues( CWebAPIValues *pParent, const char *pchName, EWebAPIValueType eValueType, const char *pchArrayElementNames = NULL );
 
 	~CWebAPIValues();
+
+#ifdef GC
+	// Gets the buffer pool used to reduce allocs in CWebAPIValues 
+	static CBufferPoolMT &GetBufferPool();
+#endif
 
 	//
 	// Child node handling
