@@ -37,7 +37,7 @@ public:
 
 };
 
-IMPLEMENT_CLASS_MEMPOOL( CCachedSubscriptionMessage, 10 * 1000, UTLMEMORYPOOL_GROW_SLOW );
+IMPLEMENT_CLASS_MEMPOOL( CCachedSubscriptionMessage, 10 * 1000, CUtlMemoryPool::GROW_SLOW );
 }
 
 #include "tier0/memdbgon.h" // needs to be the last include in the file

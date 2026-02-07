@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2004, Valve Corporation, All rights reserved. =======
+//====== Copyright ï¿½ 1996-2004, Valve Corporation, All rights reserved. =======
 //
 // Purpose:
 //
@@ -14,7 +14,7 @@
 #ifdef GC
 namespace GCSDK
 {
-IMPLEMENT_CLASS_MEMPOOL( CProtoBufNetPacket, 1000, UTLMEMORYPOOL_GROW_SLOW );
+IMPLEMENT_CLASS_MEMPOOL( CProtoBufNetPacket, 1000, CUtlMemoryPool::GROW_SLOW );
 }
 #endif
 

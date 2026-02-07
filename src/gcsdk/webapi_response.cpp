@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2010, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2010, Valve LLC, All rights reserved. ============
 //
 // Purpose: Implementation for CWebAPIResponse objects
 //
@@ -12,7 +12,7 @@ using namespace GCSDK;
 #include "tier0/memdbgoff.h"
 
 // !FIXME! DOTAMERGE
-//IMPLEMENT_CLASS_MEMPOOL_MT( CWebAPIValues, 1000, UTLMEMORYPOOL_GROW_SLOW );
+//IMPLEMENT_CLASS_MEMPOOL_MT( CWebAPIValues, 1000, CUtlMemoryPool::GROW_SLOW );
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

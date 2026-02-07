@@ -14,7 +14,7 @@
 namespace GCSDK
 {
 
-CClassMemoryPool<CNetPacket> CNetPacketPool::sm_MemPoolNetPacket( k_cInitialNetworkBuffers, UTLMEMORYPOOL_GROW_FAST );
+CClassMemoryPool<CNetPacket> CNetPacketPool::sm_MemPoolNetPacket( k_cInitialNetworkBuffers, CUtlMemoryPool::GROW_FAST );
 
 static const CThreadSafeMultiMemoryPool::MemPoolConfig_t s_MemPoolConfigAllocSize[] = {
 	{ 32, 32 },
@@ -29,7 +29,7 @@ static const CThreadSafeMultiMemoryPool::MemPoolConfig_t s_MemPoolConfigAllocSiz
 	{ 16384, 4 },
 	{ 64*1024, 4 }
 };
-CThreadSafeMultiMemoryPool g_MemPoolMsg( s_MemPoolConfigAllocSize, Q_ARRAYSIZE(s_MemPoolConfigAllocSize), UTLMEMORYPOOL_GROW_FAST );
+CThreadSafeMultiMemoryPool g_MemPoolMsg( s_MemPoolConfigAllocSize, Q_ARRAYSIZE(s_MemPoolConfigAllocSize), CUtlMemoryPool::GROW_FAST );
 
 // hacky global
 int g_cNetPacket = 0;

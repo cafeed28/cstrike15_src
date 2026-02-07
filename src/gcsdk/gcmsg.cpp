@@ -13,7 +13,7 @@
 #ifdef GC
 namespace GCSDK
 {
-	IMPLEMENT_CLASS_MEMPOOL( CStructNetPacket, 1000, UTLMEMORYPOOL_GROW_SLOW );
+	IMPLEMENT_CLASS_MEMPOOL( CStructNetPacket, 1000, CUtlMemoryPool::GROW_SLOW );
 }
 #endif
 

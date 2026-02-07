@@ -16,7 +16,7 @@
 namespace GCSDK
 {
 // Memory pool for CRecordInfo
-CThreadSafeClassMemoryPool<CRecordInfo> CRecordInfo::sm_MemPoolRecordInfo( 10, UTLMEMORYPOOL_GROW_FAST );
+CThreadSafeClassMemoryPool<CRecordInfo> CRecordInfo::sm_MemPoolRecordInfo( 10, CUtlMemoryPool::GROW_FAST );
 
 #ifdef _DEBUG
 // validation tracking
