@@ -557,7 +557,7 @@ CWorkItem *CWorkThreadPool::GetNextWorkItemToProcess( )
 }
 
 
-bool CWorkThreadPool::BDispatchCompletedWorkItems( const CLimitTimer &limitTimer, CJobMgr *pJobMgr )
+bool CWorkThreadPool::BDispatchCompletedWorkItems( CLimitTimer &limitTimer, CJobMgr *pJobMgr )
 {
 	BTryDeleteExitedWorkerThreads();
 
