@@ -39,7 +39,7 @@ GCConVar jobmgr_threadpool_size( "jobmgr_threadpool_size", "-1", 0,
 static uint32 GetThreadPoolSizeFromConVar()
 {
 	int nVal = jobmgr_threadpool_size.GetInt();
-	int nRet = ( nVal > 0 ) ? nVal : GetCPUInformation()->m_nLogicalProcessors + nVal;
+	int nRet = ( nVal > 0 ) ? nVal : GetCPUInformation().m_nLogicalProcessors + nVal;
 	return (uint32)Clamp( nRet, 1, INT_MAX );
 }
 

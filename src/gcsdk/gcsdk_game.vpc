@@ -80,10 +80,14 @@ $Project "gcsdk"
 			}
 		}
 		$File "steamextra\tier1\hashglobals.cpp"
+		$File "steamextra\tier1\murmurhash3.cpp"
 		$File "steamextra\tier1\tsmempool.cpp"
 		$File "steamextra\tier1\tsmultimempool.cpp"
+		$File "steamextra\tier1\utlstringbuilder.cpp"
 		$File "workthreadpool.cpp"
 		$File "webapi_response.cpp"
+		$File "soid.cpp"
+		$File "string_misc.cpp"
 		$File "$SRCDIR\thirdparty\JSON_parser\JSON_parser.c"
 		{
 			$Configuration
@@ -123,6 +127,8 @@ $Project "gcsdk"
 		$File "$SRCDIR\public\gcsdk\sharedobject.h"
 		$File "$SRCDIR\public\gcsdk\sharedobjectcache.h"
 		$File "$SRCDIR\public\gcsdk\gcclient_sharedobjectcache.h"
+		$File "$SRCDIR\public\gcsdk\soid.h"
+		$File "$SRCDIR\public\gcsdk\string_misc.h"
 		$File "$SRCDIR\public\gcsdk\workthreadpool.h"
 
 		$File "steamextra\clientenums.h"

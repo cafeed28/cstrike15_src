@@ -13,116 +13,14 @@
 namespace GCSDK
 {
 
-//#define SOCDebug(...) Msg( __VA_ARGS__ )
-#define SOCDebug(...) ((void)0)
-
-//----------------------------------------------------------------------------
-// Purpose: constructor
-//----------------------------------------------------------------------------
-CGCClientSharedObjectContext::CGCClientSharedObjectContext( const CSteamID & steamIDOwner )
-	: m_steamIDOwner( steamIDOwner )
-{
-
-}
-
-
-//----------------------------------------------------------------------------
-// Purpose: Adds a new Listener to the cache. All objects in the cache will
-//			be sent as create messages to the new Listener
-//----------------------------------------------------------------------------
-bool CGCClientSharedObjectContext::BAddListener( ISharedObjectListener *pListener )
-{
-	if( m_vecListeners.HasElement( pListener ) )
-		return false;
-
-	m_vecListeners.AddToTail( pListener );
-	return true;
-}
-
-
-//----------------------------------------------------------------------------
-// Purpose: Removes a Listener from the cache. All objects in the cache
-//			will have destroy messages sent for them to the new Listener.
-//----------------------------------------------------------------------------
-bool CGCClientSharedObjectContext::BRemoveListener( ISharedObjectListener *pListener )
-{
-	return m_vecListeners.FindAndRemove( pListener );
-}
-
-
-//----------------------------------------------------------------------------
-// Purpose: Send created/updated/destroyed calls on to all the listeners in the
-//			context
-//----------------------------------------------------------------------------
-void CGCClientSharedObjectContext::SOCreated( const CSharedObject *pObject, ESOCacheEvent eEvent ) const
-{
-	tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s", __FUNCTION__ );
-	FOR_EACH_VEC( m_vecListeners, nListener )
-	{
-		m_vecListeners[nListener]->SOCreated( m_steamIDOwner, pObject, eEvent );
-	}
-}
-
-void CGCClientSharedObjectContext::PreSOUpdate( ESOCacheEvent eEvent ) const
-{
-	tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s", __FUNCTION__ );
-	FOR_EACH_VEC( m_vecListeners, nListener )
-	{
-		m_vecListeners[nListener]->PreSOUpdate( m_steamIDOwner, eEvent );
-	}
-}
-
-void CGCClientSharedObjectContext::SOUpdated( const CSharedObject *pObject, ESOCacheEvent eEvent ) const
-{
-	tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s", __FUNCTION__ );
-	FOR_EACH_VEC( m_vecListeners, nListener )
-	{
-		m_vecListeners[nListener]->SOUpdated( m_steamIDOwner, pObject, eEvent );
-	}
-}
-
-void CGCClientSharedObjectContext::PostSOUpdate( ESOCacheEvent eEvent ) const
-{
-	tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s", __FUNCTION__ );
-	FOR_EACH_VEC( m_vecListeners, nListener )
-	{
-		m_vecListeners[nListener]->PostSOUpdate( m_steamIDOwner, eEvent );
-	}
-}
-
-void CGCClientSharedObjectContext::SODestroyed( const CSharedObject *pObject, ESOCacheEvent eEvent ) const
-{
-	tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s", __FUNCTION__ );
-	FOR_EACH_VEC( m_vecListeners, nListener )
-	{
-		m_vecListeners[nListener]->SODestroyed( m_steamIDOwner, pObject, eEvent );
-	}
-}
-
-void CGCClientSharedObjectContext::SOCacheSubscribed( const CSteamID & steamIDOwner, ESOCacheEvent eEvent ) const
-{
-	tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s", __FUNCTION__ );
-	FOR_EACH_VEC( m_vecListeners, nListener )
-	{
-		m_vecListeners[nListener]->SOCacheSubscribed( steamIDOwner, eEvent );
-	}
-}
-
-void CGCClientSharedObjectContext::SOCacheUnsubscribed( const CSteamID & steamIDOwner, ESOCacheEvent eEvent ) const
-{
-	tmZone( TELEMETRY_LEVEL0, TMZF_NONE, "%s", __FUNCTION__ );
-	FOR_EACH_VEC( m_vecListeners, nListener )
-	{
-		m_vecListeners[nListener]->SOCacheUnsubscribed( steamIDOwner, eEvent );
-	}
-}
-
+#define SOCDebug(...) Msg( __VA_ARGS__ )
+//#define SOCDebug(...) ((void)0)
 
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CGCClientSharedObjectTypeCache::CGCClientSharedObjectTypeCache( int nTypeID, const CGCClientSharedObjectContext & context )
-	: m_context( context ), CSharedObjectTypeCache( nTypeID )
+CGCClientSharedObjectTypeCache::CGCClientSharedObjectTypeCache( int nTypeID )
+	: CSharedObjectTypeCache( nTypeID )
 {
 
 }
@@ -250,7 +148,7 @@ CSharedObject *CGCClientSharedObjectTypeCache::BCreateFromMsg( const void *pvDat
 // Purpose: Processes a received destroy message for an object of this type on
 //			the client/gameserver
 //----------------------------------------------------------------------------
-bool CGCClientSharedObjectTypeCache::BDestroyFromMsg( const void *pvData, uint32 unSize )
+bool CGCClientSharedObjectTypeCache::BDestroyFromMsg( SOID_t owner, CGCClient &client, const void *pvData, uint32 unSize )
 {
 	CUtlBuffer bufDestroy( pvData, unSize, CUtlBuffer::READ_ONLY );
 	CSharedObject *pIndexObj = CSharedObject::Create( GetTypeID() );
@@ -263,7 +161,7 @@ bool CGCClientSharedObjectTypeCache::BDestroyFromMsg( const void *pvData, uint32
 	CSharedObject *pObject = RemoveObject( *pIndexObj );
 	if( pObject )
 	{
-		m_context.SODestroyed( pObject, eSOCacheEvent_Incremental );
+		client.DispatchSODestroyed( owner, pObject, eSOCacheEvent_Incremental );
 		delete pObject;
 	}
 
@@ -276,7 +174,7 @@ bool CGCClientSharedObjectTypeCache::BDestroyFromMsg( const void *pvData, uint32
 // Purpose: Processes a received destroy message for an object of this type on
 //			the client/gameserver
 //----------------------------------------------------------------------------
-bool CGCClientSharedObjectTypeCache::BUpdateFromMsg( const void *pvData, uint32 unSize )
+bool CGCClientSharedObjectTypeCache::BCreateOrUpdateFromMsg( SOID_t owner, CGCClient &client, const void *pvData, uint32 unSize )
 {
 	CUtlBuffer bufUpdate( pvData, unSize, CUtlBuffer::READ_ONLY );
 	CSharedObject *pIndexObj = CSharedObject::Create( GetTypeID() );
@@ -296,7 +194,12 @@ bool CGCClientSharedObjectTypeCache::BUpdateFromMsg( const void *pvData, uint32 
 		bufUpdate.SeekGet( CUtlBuffer::SEEK_HEAD, 0 );
 
 		bRet = pObj->BUpdateFromNetwork( *pIndexObj );
-		m_context.SOUpdated( pObj, eSOCacheEvent_Incremental );
+		client.DispatchSOUpdated( owner, pObj, eSOCacheEvent_Incremental );
+	}
+	else
+	{
+		AddObject( pIndexObj );
+		client.DispatchSOCreated( owner, pIndexObj, eSOCacheEvent_Incremental );
 	}
 
 	delete pIndexObj;
@@ -307,8 +210,8 @@ bool CGCClientSharedObjectTypeCache::BUpdateFromMsg( const void *pvData, uint32 
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CGCClientSharedObjectCache::CGCClientSharedObjectCache( const CSteamID & steamIDOwner ) 
-	: m_context( steamIDOwner ),
+CGCClientSharedObjectCache::CGCClientSharedObjectCache( SOID_t ID ) 
+	: m_IDOwner( ID ),
 	m_bInitialized( false ),
 	m_bSubscribed( false )
 {
@@ -327,7 +230,7 @@ CGCClientSharedObjectCache::~CGCClientSharedObjectCache()
 //----------------------------------------------------------------------------
 // Purpose: Process an incoming create message on a client/gameserver.
 //----------------------------------------------------------------------------
-bool CGCClientSharedObjectCache::BParseCacheSubscribedMsg( const CMsgSOCacheSubscribed & msg )
+bool CGCClientSharedObjectCache::BParseCacheSubscribedMsg( CGCClient &owner, const CMsgSOCacheSubscribed & msg )
 {
 
 	// Assume all type caches will be untouched
@@ -397,25 +300,25 @@ bool CGCClientSharedObjectCache::BParseCacheSubscribedMsg( const CMsgSOCacheSubs
 	//
 
 	// Initial cache subscribed
-	m_context.SOCacheSubscribed( GetOwner(), eNotificationEvent );
+	owner.DispatchSOCacheSubscribed( GetOwner(), eNotificationEvent );
 
 	// Deletions
 	for ( int i = 0 ; i < vecObjectsToDestroy.Count() ; ++i )
 	{
-		m_context.SODestroyed( vecObjectsToDestroy[i], eNotificationEvent );
+		owner.DispatchSODestroyed( GetOwner(), vecObjectsToDestroy[i], eNotificationEvent );
 		delete vecObjectsToDestroy[i];
 	}
 
 	// Updates
 	for ( int i = 0 ; i < vecUpdatedObjects.Count() ; ++i )
 	{
-		m_context.SOUpdated( vecUpdatedObjects[i], eNotificationEvent );
+		owner.DispatchSOUpdated( GetOwner(), vecUpdatedObjects[i], eNotificationEvent );
 	}
 
 	// Created
 	for ( int i = 0 ; i < vecCreatedObjects.Count() ; ++i )
 	{
-		m_context.SOUpdated( vecCreatedObjects[i], eNotificationEvent );
+		owner.DispatchSOUpdated( GetOwner(), vecCreatedObjects[i], eNotificationEvent );
 	}
 
 	// Return true if everything parsed OK, or false
@@ -427,41 +330,7 @@ bool CGCClientSharedObjectCache::BParseCacheSubscribedMsg( const CMsgSOCacheSubs
 //----------------------------------------------------------------------------
 // Purpose: Process an incoming create message on a client/gameserver.
 //----------------------------------------------------------------------------
-void CGCClientSharedObjectCache::NotifyUnsubscribe()
-{
-	if ( m_bSubscribed )
-	{
-		m_bSubscribed = false;
-		m_context.SOCacheUnsubscribed( GetOwner(), eSOCacheEvent_Unsubscribed );
-	}
-	else
-	{
-		AssertMsg( m_bSubscribed, "GC Sending us Unsubscribed message when we weren't subscribed" ); // Might not be a bug, but something worth checking
-	}
-}
-
-//----------------------------------------------------------------------------
-// Purpose: GC is telling us that the version we have is up-to-date,a nd we are subscribed
-//----------------------------------------------------------------------------
-void CGCClientSharedObjectCache::NotifyResubscribedUpToDate()
-{
-	if ( !m_bSubscribed )
-	{
-		Assert( m_bInitialized );
-		m_bSubscribed = true;
-		m_context.SOCacheSubscribed( GetOwner(), eSOCacheEvent_Subscribed );
-	}
-	else
-	{
-		AssertMsg( m_bSubscribed, "Got NotifyResubscribedUpToDate when we were already subscribed?" ); // Might not be a bug, but something worth checking
-	}
-}
-
-
-//----------------------------------------------------------------------------
-// Purpose: Process an incoming create message on a client/gameserver.
-//----------------------------------------------------------------------------
-bool CGCClientSharedObjectCache::BCreateFromMsg( int nTypeID, const void *pvData, uint32 unSize )
+bool CGCClientSharedObjectCache::BCreateFromMsg( CGCClient &owner, int nTypeID, const void *pvData, uint32 unSize )
 {
 	// We should be subscribed
 	if ( !m_bInitialized || !m_bSubscribed )
@@ -487,11 +356,11 @@ bool CGCClientSharedObjectCache::BCreateFromMsg( int nTypeID, const void *pvData
 	{
 		// This can happen --- see comment at the top of this function
 		//Assert( !bUpdatedExisting ); // shouldn't the GC know what it's already sent us?  This is weird
-		m_context.SOUpdated( pObject, eSOCacheEvent_Incremental );
+		owner.DispatchSOUpdated( GetOwner(), pObject, eSOCacheEvent_Incremental );
 	}
 	else
 	{
-		m_context.SOCreated( pObject, eSOCacheEvent_Incremental );
+		owner.DispatchSOCreated( GetOwner(), pObject, eSOCacheEvent_Incremental );
 	}
 
 	return true;
@@ -501,12 +370,12 @@ bool CGCClientSharedObjectCache::BCreateFromMsg( int nTypeID, const void *pvData
 //----------------------------------------------------------------------------
 // Purpose: Processes an incoming destroy message on a client/gameserver.
 //----------------------------------------------------------------------------
-bool CGCClientSharedObjectCache::BDestroyFromMsg( int nTypeID, const void *pvData, uint32 unSize )
+bool CGCClientSharedObjectCache::BDestroyFromMsg( CGCClient &owner, int nTypeID, const void *pvData, uint32 unSize )
 {
 	CGCClientSharedObjectTypeCache *pTypeCache = FindTypeCache( nTypeID );
 	if( pTypeCache )
 	{
-		return pTypeCache->BDestroyFromMsg( pvData, unSize );
+		return pTypeCache->BDestroyFromMsg( GetOwner(), owner, pvData, unSize );
 	}
 	else
 	{
@@ -517,12 +386,12 @@ bool CGCClientSharedObjectCache::BDestroyFromMsg( int nTypeID, const void *pvDat
 //----------------------------------------------------------------------------
 // Purpose: Processes an incoming update message on a client/gameserver.
 //----------------------------------------------------------------------------
-bool CGCClientSharedObjectCache::BUpdateFromMsg( int nTypeID, const void *pvData, uint32 unSize )
+bool CGCClientSharedObjectCache::BUpdateFromMsg( CGCClient &owner, int nTypeID, const void *pvData, uint32 unSize )
 {
 	CGCClientSharedObjectTypeCache *pTypeCache = FindTypeCache( nTypeID );
 	if( pTypeCache )
 	{
-		return pTypeCache->BUpdateFromMsg( pvData, unSize );
+		return pTypeCache->BCreateOrUpdateFromMsg( GetOwner(), owner, pvData, unSize );
 	}
 	else
 	{
@@ -530,57 +399,21 @@ bool CGCClientSharedObjectCache::BUpdateFromMsg( int nTypeID, const void *pvData
 	}	
 }
 
-//----------------------------------------------------------------------------
-// Purpose: Adds a listener object to be notified of object changes in this 
-//			cache. The shared object cache does not own this object and will
-//			not free it.
-//----------------------------------------------------------------------------
-void CGCClientSharedObjectCache::AddListener( ISharedObjectListener *pListener )
+void CGCClientSharedObjectCache::NotifyCreated(ISharedObjectListener& context)
 {
-	Assert( pListener );
-	if ( !m_context.BAddListener( pListener ) )
-		return; // was already listening, no action needed
+	context.SOCacheSubscribed( GetOwner(), eSOCacheEvent_ListenerAdded );
 
-	SOCDebug( "[%s] Adding listener %s\n", GetOwner().Render(), typeid( *pListener ).name() );
-
-	// If we're already subscribed, then immediately send notifications
-	if( BIsSubscribed() )
+	for ( int i = FirstTypeCacheIndex(); i != InvalidTypeCacheIndex(); i = NextTypeCacheIndex( i ) )
 	{
-		pListener->SOCacheSubscribed( GetOwner(), eSOCacheEvent_ListenerAdded );
-		for ( int i = FirstTypeCacheIndex(); i != InvalidTypeCacheIndex(); i = NextTypeCacheIndex( i ) )
+		CGCClientSharedObjectTypeCache *pTypeCache = GetTypeCacheByIndex( i );
+		
+		int nObjectsCount = pTypeCache->GetCount();
+		for ( int nObj = nObjectsCount; nObj < nObjectsCount; nObj++ )
 		{
-			CGCClientSharedObjectTypeCache *pTypeCache = GetTypeCacheByIndex( i );
-			for ( uint32 j = 0 ; j < pTypeCache->GetCount() ; ++j )
-			{
-				CSharedObject *pObject = pTypeCache->GetObject( j );
-				pListener->SOCreated( GetOwner(), pObject, eSOCacheEvent_ListenerAdded );
-			}
+			CSharedObject *pObj = pTypeCache->GetObject( nObj );
+			context.SOCreated( GetOwner(), pObj, eSOCacheEvent_ListenerAdded );
 		}
 	}
-}
-
-
-//----------------------------------------------------------------------------
-// Purpose: Removes a listener object from the list to be notified of changes
-//			to this object cache.
-//----------------------------------------------------------------------------
-bool CGCClientSharedObjectCache::RemoveListener( ISharedObjectListener *pListener )
-{
-	Assert( pListener );
-	if ( !m_context.BRemoveListener( pListener ) )
-		return false; // wasn't already listening, nothing to do
-
-	SOCDebug( "[%s] Removing listener %s\n", GetOwner().Render(), typeid( *pListener ).name() );
-
-	// If we were subscribed, then the listener's last subscribe notification
-	// was a "you are subscribed."  Send him an unsubscribed notification
-	// so he doesn't think he's still subscribed.
-	if( BIsSubscribed() )
-	{
-		pListener->SOCacheUnsubscribed( GetOwner(), eSOCacheEvent_ListenerRemoved );
-	}
-
-	return true;
 }
 
 }  // namespace GCSDK

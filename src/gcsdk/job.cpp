@@ -106,9 +106,6 @@ CJob::~CJob()
 		m_vecNetPackets[i]->Release();
 	}
 	m_vecNetPackets.RemoveAll();
-
-	AssertMsg2( 0 == GetDoNotYieldDepth(), "Job ending with %d open Do Not Yields. Are we missing a END_DO_NOT_YIELD()? Innermost delared at %s",
-		GetDoNotYieldDepth(), m_stackDoNotYieldGuards[m_stackDoNotYieldGuards.Head()] );
 }
 
 
@@ -216,8 +213,9 @@ CJobMgr &CJob::GetJobMgr()
 //			pubPkt -			The raw message packet
 //			cubPkt -			The size of the message packet
 //-----------------------------------------------------------------------------
-void CJob::StartJobFromNetworkMsg( IMsgNetPacket *pNetPacket, const JobID_t &gidJobIDSrc )
+void CJob::StartJobFromNetworkMsg( IMsgNetPacket *pNetPacket, const JobID_t &gidJobIDSrc, uint32 nContextMask )
 {
+	m_nContextMask = nContextMask;
 	// hang on to the packet with the message that started this job
 	AddPacketToList( pNetPacket, gidJobIDSrc );
 	SetFromFromMsg( true );
@@ -270,12 +268,12 @@ void CJob::InitCoroutine()
 {
 	// make sure we have an appropriate chunk of memory to store 
 	// our debug alloc info
-	if( MemAlloc_GetDebugInfoSize() )
+	if( g_pMemAlloc->GetDebugInfoSize() )
 	{
-		m_memAllocStack.EnsureCapacity( MemAlloc_GetDebugInfoSize() );
+		m_memAllocStack.EnsureCapacity( g_pMemAlloc->GetDebugInfoSize() );
 
 		// Set the job name as the root
-		MemAlloc_InitDebugInfo( m_memAllocStack.Base(), GetName(), 0 ); 
+		g_pMemAlloc->InitDebugInfo( m_memAllocStack.Base(), GetName(), 0 ); 
 	}
 
 	// Set the job name
@@ -387,8 +385,8 @@ void CJob::Continue()
 
 	// Save debug credit "call stack"
 	void *pvSaveDebugInfo = GetJobMgr().GetMainMemoryDebugInfo();
-	MemAlloc_SaveDebugInfo( pvSaveDebugInfo );
-	MemAlloc_RestoreDebugInfo( m_memAllocStack.Base() );
+	g_pMemAlloc->SaveDebugInfo( pvSaveDebugInfo );
+	g_pMemAlloc->RestoreDebugInfo( m_memAllocStack.Base() );
 
 	// continue the coroutine, with the profiling if necessary
 	bool bJobStillActive;
@@ -410,9 +408,9 @@ void CJob::Continue()
 	if( bJobStillActive )
 	{
 		// only save off debug info for jobs that are still running
-		MemAlloc_SaveDebugInfo( m_memAllocStack.Base() );
+		g_pMemAlloc->SaveDebugInfo( m_memAllocStack.Base() );
 	}
-	MemAlloc_RestoreDebugInfo( pvSaveDebugInfo );
+	g_pMemAlloc->RestoreDebugInfo( pvSaveDebugInfo );
 
 }
 
@@ -432,10 +430,9 @@ void CJob::Debug()
 //-----------------------------------------------------------------------------
 // Purpose: pauses the current job
 //-----------------------------------------------------------------------------
-void CJob::Pause( EJobPauseReason eReason )
+void CJob::Pause( EJobPauseReason eReason, const char *pszResourceName )
 {
 	AssertRunningThisJob();
-	AssertMsg1( 0 == m_stackDoNotYieldGuards.Count(), "Yielding while in a BEGIN_DO_NOT_YIELD() block declared at %s", m_stackDoNotYieldGuards[m_stackDoNotYieldGuards.Head()] );
 
 	g_pJobCur = m_pJobPrev;
 
@@ -500,22 +497,9 @@ bool CJob::BYieldingWaitForMsg( CGCMsgBase *pMsg, MsgType_t eMsg )
 {
 	IMsgNetPacket *pNetPacket = NULL;
 
-	// Check if we already waited for a message of this type
-	// but timed out.  If so, then we currently don't have a way
-	// to tell if the message we might receive is the reply
-	// to the old mesage, of the one we're about to send.
-	// So let's just disallow this entirely.
-	if ( BHasFailedToReceivedMsgType( eMsg ) )
-	{
-		AssertMsg2( false, "Job %s cannot wait for msg %u, it has already failed to wait for that msg type.", GetName(), eMsg );
-		return false;
-	}
-
 	m_unWaitMsgType = eMsg;
 	if ( !BYieldingWaitForMsg( &pNetPacket) )
 	{
-		// Remember this event, so we can at least detect if a reply comes late, we don't get confused.
-		MarkFailedToReceivedMsgType( eMsg );
 		return false;
 	}
 
@@ -523,40 +507,11 @@ bool CJob::BYieldingWaitForMsg( CGCMsgBase *pMsg, MsgType_t eMsg )
 
 	if ( pMsg->Hdr().m_eMsg != eMsg )
 	{
-		// Remember this event, so we can at least detect if a reply comes late, we don't get confused.
-		MarkFailedToReceivedMsgType( eMsg );
-
 		AssertMsg2( false, "CJob::BYieldingWaitForMsg expected msg %u but received %u", eMsg, pMsg->Hdr().m_eMsg );
 		return false;
 	}
 
 	return true;
-}
-
-//-----------------------------------------------------------------------------
-bool CJob::BHasFailedToReceivedMsgType( MsgType_t m ) const
-{
-	FOR_EACH_VEC( m_vecMsgTypesFailedToReceive, i )
-	{
-		if ( m_vecMsgTypesFailedToReceive[i] == m )
-			return true;
-	}
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-void CJob::MarkFailedToReceivedMsgType( MsgType_t m )
-{
-	if ( !BHasFailedToReceivedMsgType( m ) )
-	{
-		m_vecMsgTypesFailedToReceive.AddToTail( m );
-	}
-}
-
-//-----------------------------------------------------------------------------
-void CJob::ClearFailedToReceivedMsgType( MsgType_t m )
-{
-	m_vecMsgTypesFailedToReceive.FindAndFastRemove( m );
 }
 
 //-----------------------------------------------------------------------------
@@ -566,22 +521,9 @@ bool CJob::BYieldingWaitForMsg( CProtoBufMsgBase *pMsg, MsgType_t eMsg )
 {
 	IMsgNetPacket *pNetPacket = NULL;
 
-	// Check if we already waited for a message of this type
-	// but timed out.  If so, then we currently don't have a way
-	// to tell if the message we might receive is the reply
-	// to the old mesage, of the one we're about to send.
-	// So let's just disallow this entirely.
-	if ( BHasFailedToReceivedMsgType( eMsg ) )
-	{
-		AssertMsg2( false, "Job %s cannot wait for msg %u, it has already failed to wait for that msg type.", GetName(), eMsg );
-		return false;
-	}
-
 	m_unWaitMsgType = eMsg;
 	if ( !BYieldingWaitForMsg( &pNetPacket) )
 	{
-		// Remember this event, so we can at least detect if a reply comes late, we don't get confused.
-		MarkFailedToReceivedMsgType( eMsg );
 		return false;
 	}
 
@@ -589,9 +531,6 @@ bool CJob::BYieldingWaitForMsg( CProtoBufMsgBase *pMsg, MsgType_t eMsg )
 
 	if ( pMsg->GetEMsg() != eMsg )
 	{
-		// Remember this event, so we can at least detect if a reply comes late, we don't get confused.
-		MarkFailedToReceivedMsgType( eMsg );
-
 		EmitError( SPEW_GC, "CJob::BYieldingWaitForMsg expected msg %u but received %u", eMsg, pMsg->GetEMsg() );
 		return false;
 	}
@@ -766,44 +705,6 @@ void CJob::Heartbeat()
 
 
 //-----------------------------------------------------------------------------
-// Purpose: waits for specified time and checks for timeout.  Useful when you
-//			need to repeatedly sleep while waiting for something to happen.
-//			This function uses STime (server "pseudo" time) to determine
-//			timeout conditions.
-//
-// Input:	cMicrosecondsToSleep - duration to sleep this call
-//			stimeStarted - the time to calculate timeout from.  (Typically,
-//				the time you start calling this in a loop, passing the same
-//				start time each time you call this method.)
-//			nMicroSecLimit - duration from stimeStarted to consider timed out
-// Output : Returns true if not timed out yet, false if timed out
-//-----------------------------------------------------------------------------
-bool CJob::BYieldingWaitTimeWithLimit( uint32 cMicrosecondsToSleep, CJobTime &stimeStarted, int64 nMicroSecLimit )
-{
-	if ( stimeStarted.CServerMicroSecsPassed() > nMicroSecLimit )
-		return false;
-
-	return BYieldingWaitTime( cMicrosecondsToSleep );
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: waits for specified time and checks for timeout.  Useful when you
-//			need to repeatedly sleep while waiting for something to happen.
-//			This function uses RTime (wall-clock "real" time) to determine
-//			timeout conditions.
-//
-// Input:	cMicrosecondsToSleep - duration to sleep this call
-//			nSecLimit - duration from stimeStarted to consider timed out
-// Output : Returns true if not timed out yet, false if timed out
-//-----------------------------------------------------------------------------
-bool CJob::BYieldingWaitTimeWithLimitRealTime( uint32 cMicrosecondsToSleep, int nSecondsLimit )
-{
-	return BYieldingWaitTime( cMicrosecondsToSleep );
-}
-
-
-//-----------------------------------------------------------------------------
 // Purpose: pauses the job for the specified amount of time
 // Input  : m_cMicrosecondsToSleep - microseconds to wait for
 // Output : Returns true on success, false on failure.
@@ -928,7 +829,7 @@ bool CJob::_BYieldingAcquireLock( CLock *pLock, const char *filename, int line )
 		m_pWaitingOnLockFilename = filename;
 		m_waitingOnLockLine = line;
 		m_cLocksWaitedFor++;
-		Pause( k_EJobPauseReasonWaitingForLock );
+		Pause( k_EJobPauseReasonWaitingForLock, NULL );
 		m_pWaitingOnLock = NULL;
 
 		// make sure we actually got it, instead of timing out
@@ -1222,54 +1123,6 @@ void CJob::OnLockDeleted( CLock *pLock )
 	UnsetLock( pLock );
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Reports how many Do Not Yield guards the job currently has
-//-----------------------------------------------------------------------------
-int32 CJob::GetDoNotYieldDepth() const
-{
-	return m_stackDoNotYieldGuards.Count();
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Adds a Do Not Yield guard to the job
-//-----------------------------------------------------------------------------
-void CJob::PushDoNotYield( const char *pchFileAndLine )
-{
-	m_stackDoNotYieldGuards.AddToHead( pchFileAndLine );
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Removes the last-added Do Not Yield guard from the job
-//-----------------------------------------------------------------------------
-void CJob::PopDoNotYield()
-{
-	AssertMsg( m_stackDoNotYieldGuards.Count() > 0, "Could not pop a Do Not Yield guard when the job's stack is empty" );
-	if ( m_stackDoNotYieldGuards.Count() > 0 )
-	{
-		m_stackDoNotYieldGuards.Remove( m_stackDoNotYieldGuards.Head() );
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: Implementation of the stack-scope Do Not Yield guard
-//-----------------------------------------------------------------------------
-CDoNotYieldScope::CDoNotYieldScope( const char *pchFileAndLine )
-{
-	AssertRunningJob();
-
-	GJobCur().PushDoNotYield( pchFileAndLine );
-}
-
-CDoNotYieldScope::~CDoNotYieldScope()
-{
-	AssertRunningJob();
-
-	GJobCur().PopDoNotYield();
-}
-
 
 #ifdef DBGFLAG_VALIDATE
 //-----------------------------------------------------------------------------
@@ -1305,8 +1158,6 @@ m_pJobToNotifyOnLockRelease( NULL ),
 m_pJobWaitingQueueTail( NULL ), 
 m_nWaitingCount(0),
 m_nsLockType(0),
-m_nsNameType( k_ENameTypeNone ),
-m_ulID( 0 ),
 m_pchConstStr( NULL ),
 m_unLockSubType ( 0 ),
 m_nRefCount( 0 ),
@@ -1345,44 +1196,15 @@ void CLock::AddToWaitingQueue( CJob *pJob )
 
 void CLock::SetName( const char *pchName )
 {
-	m_nsNameType = k_ENameTypeConstStr;
 	m_pchConstStr = pchName;
-}
-
-
-void CLock::SetName( const char *pchPrefix, uint64 ulID )
-{
-	m_nsNameType = k_ENameTypeConcat;
-	m_pchConstStr = pchPrefix;
-	m_ulID = ulID;
-}
-
-
-void CLock::SetName( const CSteamID &steamID )
-{
-	m_nsNameType = k_ENameTypeSteamID;
-	m_ulID = steamID.ConvertToUint64();
 }
 
 
 const char *CLock::GetName() const
 {
-	switch ( m_nsNameType )
-	{
-	case k_ENameTypeNone:
-		return "None";
-	case k_ENameTypeSteamID:
-		return CSteamID::Render( m_ulID );
-	case k_ENameTypeConstStr:
-		return m_pchConstStr;
-	case k_ENameTypeConcat:
-		if ( !m_strName.Length() )
-			m_strName.Format( "%s %llu", m_pchConstStr, m_ulID );
-		return m_strName.Get();
-	default:
-		AssertMsg1( false, "Invalid lock name type %d", m_nsNameType );
-		return "(Unknown)";
-	}
+	char* pszTemp = GetPchTempTextBuffer();
+	Q_strncpy( pszTemp, SOIDRender_t( SOID_t( m_nsLockType, m_unLockSubType ) ).String(), GetCchTempTextBuffer() );
+	return pszTemp;
 }
 
 #define REF_COUNT_ASSERT 1000

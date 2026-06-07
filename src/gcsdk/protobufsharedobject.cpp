@@ -447,7 +447,6 @@ bool CProtoBufSharedObjectBase::BUpdateFromNetwork( const CSharedObject & objUpd
 }
 
 
-#ifdef GC
 
 //----------------------------------------------------------------------------
 // Purpose: Static help class that seralizes to a buffer
@@ -462,17 +461,6 @@ bool CProtoBufSharedObjectBase::SerializeToBuffer( const ::google::protobuf::Mes
 	return true;
 }
 
-//----------------------------------------------------------------------------
-// Purpose: Adds the relevant message bits to create this object to the
-//			message. This will be called whenever a subscriber is added.
-//----------------------------------------------------------------------------
-bool CProtoBufSharedObjectBase::BAddToMessage( CUtlBuffer & bufOutput )  const
-{
-	const ::google::protobuf::Message & msg = *GetPObject();
-	SerializeToBuffer( msg, bufOutput );
-	return true;
-}
-
 
 //----------------------------------------------------------------------------
 // Purpose: Adds the relevant message bits to create this object to the
@@ -484,6 +472,8 @@ bool CProtoBufSharedObjectBase::BAddToMessage( std::string *pBuffer )  const
 
 	return msg.SerializeToString( pBuffer );
 }
+
+#ifdef GC
 
 //----------------------------------------------------------------------------
 // Purpose: Parses the message bits for creating this object from the message.
@@ -506,6 +496,8 @@ bool CProtoBufSharedObjectBase::BAddToMemcached( CUtlBuffer & bufOutput )  const
 	SerializeToBuffer( msg, bufOutput );
 	return true;
 }
+
+#endif //GC
 
 /*
 
@@ -557,20 +549,6 @@ bool CProtoBufSharedObjectBase::BAppendToMessage( std::string *pBuffer ) const
 //----------------------------------------------------------------------------
 // Purpose: Adds just the key fields to the message
 //----------------------------------------------------------------------------
-bool CProtoBufSharedObjectBase::BAddDestroyToMessage( CUtlBuffer & bufDestroy ) const
-{
-	const ::google::protobuf::Message & msg = *GetPObject();
-
-	::google::protobuf::Message *pMessageToSend = BuildDestroyToMessage( msg );
-
-	SerializeToBuffer( *pMessageToSend, bufDestroy );
-	delete pMessageToSend;
-	return true;
-}
-
-//----------------------------------------------------------------------------
-// Purpose: Adds just the key fields to the message
-//----------------------------------------------------------------------------
 bool CProtoBufSharedObjectBase::BAddDestroyToMessage( std::string *pBuffer ) const
 {
 	const ::google::protobuf::Message & msg = *GetPObject();
@@ -580,8 +558,6 @@ bool CProtoBufSharedObjectBase::BAddDestroyToMessage( std::string *pBuffer ) con
 	delete pMessageToSend;
 	return true;
 }
-
-#endif //GC
 
 //----------------------------------------------------------------------------
 // Purpose: Copy the data from the specified schema shared object into this. 

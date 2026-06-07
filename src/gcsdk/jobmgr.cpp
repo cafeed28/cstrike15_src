@@ -24,15 +24,14 @@ typedef int (__cdecl *QSortCompareFuncCtx_t)(void *, const void *, const void *)
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
 CJobMgr::CJobMgr()
-:	m_MapJob( 0, 0, DefLessFunc( GID_t ) ), 
+:	m_MapJob( ), 
 	m_QueueJobSleeping( 0, 0, &JobSleepingLessFunc ),
 	m_unNextJobID( 0 ),
-	m_mapStatsBucket( 0, 0, DefLessFunc(uint32) ),
-	m_WorkThreadPool( "CJobMgr::m_WorkThreadPool" ),
-	m_bDebugDisallowPause( false )
+	m_mapStatsBucket( ),
+	m_WorkThreadPool( "CJobMgr::m_WorkThreadPool" )
 {
-	SetDefLessFunc( m_MapJobTimeoutsIndexByJobID );
-	SetDefLessFunc( m_mapOrphanMessages );
+	//SetDefLessFunc( m_MapJobTimeoutsIndexByJobID );
+	//SetDefLessFunc( m_mapOrphanMessages );
     m_bJobTimedOut = false;
 	m_nCurrentYieldIterationRegPri = 0;
 	m_bProfiling = false;
@@ -40,15 +39,10 @@ CJobMgr::CJobMgr()
 	m_cErrorsToReport = 0;
 	m_unFrameFuncThreadID = 0;
 	m_WorkThreadPool.SetWorkThreadAutoConstruct( 1, NULL );
-	
-	if( MemAlloc_GetDebugInfoSize() > 0 )
-	{
-		g_memMainDebugInfo.Init( 0, MemAlloc_GetDebugInfoSize() );
-	}
 
-	if( MemAlloc_GetDebugInfoSize() > 0 )
+	if( g_pMemAlloc->GetDebugInfoSize() > 0 )
 	{
-		g_memMainDebugInfo.EnsureCapacity( MemAlloc_GetDebugInfoSize() );
+		g_memMainDebugInfo.EnsureCapacity( g_pMemAlloc->GetDebugInfoSize() );
 	}
 }
 
@@ -242,7 +236,6 @@ void CJobMgr::RemoveJob( CJob &job )
 
 	uint64 u64JobDuration = job.m_STimeStarted.CServerMicroSecsPassed();
 	m_JobStats.m_flSumJobTimeMicrosec += u64JobDuration;
-	m_JobStats.m_flSumSqJobTimeMicrosec += ((double)u64JobDuration * (double)u64JobDuration);
 	if ( u64JobDuration > m_JobStats.m_unMaxJobTimeMicrosec )
 	{
 		m_JobStats.m_unMaxJobTimeMicrosec = u64JobDuration;
@@ -342,11 +335,11 @@ CJob *CJobMgr::GetPJob( JobID_t jobID )
 //			and if so, sends it to that job.  Creates a new job if necessary.
 // Output:	true if the message was routed to a job
 //-----------------------------------------------------------------------------
-bool CJobMgr::BRouteMsgToJob( void *pParent, IMsgNetPacket *pNetPacket, const JobMsgInfo_t &jobMsgInfo )
+bool CJobMgr::BRouteMsgToJob( void *pParent, IMsgNetPacket *pNetPacket, const JobMsgInfo_t &jobMsgInfo, EGCMsgContext nCreateContext )
 {
 	if ( pNetPacket == NULL )
 	{
-		AssertMsg(pNetPacket, "CJobMgr::BRouteMsgToJob received NULL packet.");
+		AssertMsg(pNetPacket, "CJobMgr::BRouteMsgToJob received NULL packet."); // RE NOTE: line 600
 		return false;
 	}
 
@@ -372,7 +365,7 @@ bool CJobMgr::BRouteMsgToJob( void *pParent, IMsgNetPacket *pNetPacket, const Jo
 	// We pass in a pointer to m_JobIDTarget so that it gets set to the new Job's ID. This ensures
 	// that anyone replying to this message from within the new job has the right JobIDSource.
 	VPROF_BUDGET( "CJobMgr::BRouteMsgToJob() - job", VPROF_BUDGETGROUP_JOBS_COROUTINES );
-	bool bRet = BLaunchJobFromNetworkMsg( pParent, jobMsgInfo, pNetPacket );
+	bool bRet = BLaunchJobFromNetworkMsg( pParent, jobMsgInfo, pNetPacket, nCreateContext );
 
 	if ( !bRet && jobMsgInfo.m_JobIDTarget != k_GIDNil )
 	{
@@ -391,14 +384,6 @@ bool CJobMgr::BRouteMsgToJob( void *pParent, IMsgNetPacket *pNetPacket, const Jo
 //-----------------------------------------------------------------------------
 void CJobMgr::PassMsgToJob( CJob &job, IMsgNetPacket *pNetPacket, const JobMsgInfo_t &jobMsgInfo  )
 {
-	// Check if this job previously failed to wait for this message type,
-	// then this is probably a late reply.  Discard it
-	if ( job.BHasFailedToReceivedMsgType( jobMsgInfo.m_eMsg ) )
-	{
-		EmitInfo( SPEW_JOB, 2, LOG_ALWAYS, "Reply msg type %s to job %s is too late; discarding\n", PchMsgNameFromEMsg( jobMsgInfo.m_eMsg ), job.GetName() );
-		return;
-	}
-
 	// make sure it's what we're waiting for
 	if ( job.GetPauseReason() != k_EJobPauseReasonNetworkMsg )
 	{
@@ -417,6 +402,22 @@ void CJobMgr::PassMsgToJob( CJob &job, IMsgNetPacket *pNetPacket, const JobMsgIn
 	return;
 }
 
+void CJobMgr::PushDoNotYield( CJob &job, const char *pchFileAndLine )
+{
+	m_stackDoNotYieldGuards.AddToTail( MakeUtlPair( job.GetJobID(), pchFileAndLine ) );
+}
+
+void CJobMgr::PopDoNotYield( CJob &job )
+{
+	int nCount = m_stackDoNotYieldGuards.Count();
+	if ( nCount > 0 )
+	{
+		if ( m_stackDoNotYieldGuards[ nCount ].first == job.GetJobID() )
+		{
+			m_stackDoNotYieldGuards.Remove(nCount);
+		}
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: pauses the job until a network msg for the specified job arrives
@@ -689,15 +690,6 @@ void CJobMgr::AddThreadedJobWorkItem( CWorkItem *pWorkItem )
 bool CJobMgr::HasOutstandingThreadPoolWorkItems()
 {
 	return m_WorkThreadPool.HasWorkItemsToProcess();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Mark that we're shutting down
-//-----------------------------------------------------------------------------
-void CJobMgr::SetIsShuttingDown()
-{
-	m_WorkThreadPool.AllowTimeouts( true ); // during shutdown, we might abort jobs before waiting for the work item to complete
-	m_bIsShuttingDown = true;
 }
 
 
@@ -1093,14 +1085,8 @@ void CJobMgr::WakeupLockedJob( CJob &job )
 //-----------------------------------------------------------------------------
 // Purpose: Pauses a job, and puts it in a list to check for timeouts
 //-----------------------------------------------------------------------------
-void CJobMgr::PauseJob( CJob &job, EJobPauseReason eJobPauseReason )
+void CJobMgr::PauseJob( CJob &job, EJobPauseReason eJobPauseReason, const char *pszPauseResourceName )
 {
-	Assert( !m_bDebugDisallowPause );
-	if ( m_bDebugDisallowPause )
-	{
-		EmitError( SPEW_GC, "Job %s attempted to pause even though pauses were disabled\n", job.GetName() );
-	}
-
 	// add to list to check for timeouts later (or update the existing entry if it is already there)
 	JobTimeout_t *pJobTimeout;
 	int iMapIndex = m_MapJobTimeoutsIndexByJobID.Find( job.GetJobID() );
@@ -1135,7 +1121,7 @@ void CJobMgr::PauseJob( CJob &job, EJobPauseReason eJobPauseReason )
 	}
 
 	// tell the job to pause
-	job.Pause( eJobPauseReason );
+	job.Pause( eJobPauseReason, pszPauseResourceName );
 }
 
 //-----------------------------------------------------------------------------
@@ -1144,7 +1130,7 @@ void CJobMgr::PauseJob( CJob &job, EJobPauseReason eJobPauseReason )
 //-----------------------------------------------------------------------------
 int CJobMgr::DumpJobSummary()
 {
-	CUtlMap< uint32, JobStatsBucket_t, int > mapStatsBucket( 0, 0, DefLessFunc( uint32 ) );
+	CUtlHashMapLarge< uint32, JobStatsBucket_t > mapStatsBucket{ };
 
 	FOR_EACH_MAP_FAST( m_MapJob, i )
 	{
@@ -1287,11 +1273,6 @@ void CJobMgr::CheckThreadID()
 //-----------------------------------------------------------------------------
 bool JobTypeSortFuncByMsg( JobType_t const * const &lhs, JobType_t const * const &rhs )
 {
-	if ( lhs->m_eCreationMsg == rhs->m_eCreationMsg )
-	{
-		return ( lhs->m_eServerType < rhs->m_eServerType );
-	}
-
 	return ( lhs->m_eCreationMsg < rhs->m_eCreationMsg );
 }
 
@@ -1302,13 +1283,7 @@ bool JobTypeSortFuncByMsg( JobType_t const * const &lhs, JobType_t const * const
 //-----------------------------------------------------------------------------
 bool JobTypeSortFuncByName( JobType_t const * const &lhs, JobType_t const * const &rhs )
 {
-	int iCompare = Q_strcmp( lhs->m_pchName, rhs->m_pchName );
-	if ( iCompare == 0 )
-	{
-		return ( lhs->m_eServerType < rhs->m_eServerType );
-	}
-
-	return ( iCompare < 0 );
+	return ( Q_strcmp( lhs->m_pchName, rhs->m_pchName )< 0 );
 }
 
 
@@ -1345,8 +1320,9 @@ void CJobMgr::RegisterJobType( const JobType_t *pJobType )
 //			msg - network msg
 // Output : true if a job was created
 //-----------------------------------------------------------------------------
-bool CJobMgr::BLaunchJobFromNetworkMsg( void *pParent, const JobMsgInfo_t &jobMsgInfo, IMsgNetPacket *pNetPacket )
+bool CJobMgr::BLaunchJobFromNetworkMsg( void *pParent, const JobMsgInfo_t &jobMsgInfo, IMsgNetPacket *pNetPacket, EGCMsgContext nCreateContext )
 {
+	// RE TODO
 	if ( pNetPacket == NULL )
 	{
 		AssertMsg(pNetPacket, "CJobMgr::BLaunchJobFromNetworkMsg received NULL packet.");
@@ -1355,7 +1331,7 @@ bool CJobMgr::BLaunchJobFromNetworkMsg( void *pParent, const JobMsgInfo_t &jobMs
 
 	if ( pNetPacket->BHasTargetJobName() && BIsValidSystemMsg( pNetPacket->GetEMsg(), NULL ) )
 	{
-		JobType_t jobSearch = { pNetPacket->GetTargetJobName(), k_EGCMsgInvalid, jobMsgInfo.m_eServerType };
+		JobType_t jobSearch = { pNetPacket->GetTargetJobName(), k_EGCMsgInvalid };
 		int iJobType = GMapJobTypesByName().Find( &jobSearch );
 
 		if ( GMapJobTypesByName().IsValidIndex( iJobType ) )
@@ -1377,13 +1353,13 @@ bool CJobMgr::BLaunchJobFromNetworkMsg( void *pParent, const JobMsgInfo_t &jobMs
 			}
 
 			// Start the job
-			job->StartJobFromNetworkMsg( pNetPacket, jobMsgInfo.m_JobIDSource );
+			job->StartJobFromNetworkMsg( pNetPacket, jobMsgInfo.m_JobIDSource, pJobType->m_nValidContexts & nCreateContext );
 			return true;
 		}
 	}
 	else
 	{
-		JobType_t jobSearch = { 0, jobMsgInfo.m_eMsg, jobMsgInfo.m_eServerType };
+		JobType_t jobSearch = { 0, jobMsgInfo.m_eMsg };
 		int iJobType = GMapJobTypesByMsg().Find( &jobSearch );
 
 		if ( GMapJobTypesByMsg().IsValidIndex( iJobType ) )
@@ -1400,12 +1376,12 @@ bool CJobMgr::BLaunchJobFromNetworkMsg( void *pParent, const JobMsgInfo_t &jobMs
 			// Safety check
 			if ( job == NULL )
 			{
-				AssertMsg3( job, "Job factory returned NULL for job msg %d, server type %d (named '%s')!\n", (int)jobMsgInfo.m_eMsg, (int)jobMsgInfo.m_eServerType, pJobType->m_pchName );
+				AssertMsg2( job, "Job factory returned NULL for job msg %d, (named '%s')!\n", (int)jobMsgInfo.m_eMsg, pJobType->m_pchName );
 				return false;
 			}
 
 			// Start the job
-			job->StartJobFromNetworkMsg( pNetPacket, jobMsgInfo.m_JobIDSource );
+			job->StartJobFromNetworkMsg( pNetPacket, jobMsgInfo.m_JobIDSource, pJobType->m_nValidContexts & nCreateContext );
 			return true;
 		}
 	}

@@ -7,6 +7,7 @@
 #include "stdafx.h"
 #include "gcmsg.h"
 #include "msgprotobuf.h"
+#include "string_misc.h"
 
 #include "tier0/memdbgoff.h"
 
@@ -23,24 +24,24 @@ namespace GCSDK
 namespace GCSDK
 {
 
-CUtlString GCMsgHdr_t::GetHeaderDescription( )
+const char *GCMsgHdr_t::GetHeaderDescription( )
 {
-	CUtlString desc;
-	desc.Format( "gc msg %s, SteamID %llu", PchMsgNameFromEMsg( m_eMsg ), m_ulSteamID );
+	char *desc = GetPchTempTextBuffer();
+	V_snprintf( desc, GetCchTempTextBuffer(), "gc msg %s, SteamID %llu", PchMsgNameFromEMsg( m_eMsg ), m_ulSteamID );
 	return desc;
 }
 
-CUtlString GCMsgHdrEx_t::GetHeaderDescription( )
+const char *GCMsgHdrEx_t::GetHeaderDescription( )
 {
-	CUtlString desc;
-	desc.Format( "gc msg %s, SteamID %llu, version %hd, job source %llu, job target %llu", PchMsgNameFromEMsg( m_eMsg ), m_ulSteamID, m_nHdrVersion, m_JobIDSource, m_JobIDTarget );
+	char *desc = GetPchTempTextBuffer();
+	V_snprintf( desc, GetCchTempTextBuffer(), "gc msg %s, SteamID %llu, version %hd, job source %llu, job target %llu", PchMsgNameFromEMsg( m_eMsg ), m_ulSteamID, m_nHdrVersion, m_JobIDSource, m_JobIDTarget );
 	return desc;
 }
 
-CUtlString GCMsgInterHdr_t::GetHeaderDescription( )
+const char *GCMsgInterHdr_t::GetHeaderDescription( )
 {
-	CUtlString desc;
-	desc.Format( "gc inter msg %s, SourceAppID %d, version %hd, job source %llu, job target %llu", PchMsgNameFromEMsg( m_eMsg ), m_unSourceAppId, m_nHdrVersion, m_JobIDSource, m_JobIDTarget );
+	char *desc = GetPchTempTextBuffer();
+	V_snprintf( desc, GetCchTempTextBuffer(), "gc inter msg %s, SourceAppID %d, version %hd, job source %llu, job target %llu", PchMsgNameFromEMsg( m_eMsg ), m_unSourceAppId, m_nHdrVersion, m_JobIDSource, m_JobIDTarget );
 	return desc;
 }
 

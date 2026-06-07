@@ -7,15 +7,11 @@
 
 
 #include "stdafx.h"
+#include "string_misc.h"
 #include "steamextra/gamecoordinator/igamecoordinatorhost.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
-
-//-----------------------------------------------------------------------------
-// Maximum length of a sprintf'ed logging message.
-//-----------------------------------------------------------------------------
-const int MAX_LOGGING_MESSAGE_LENGTH = 2048;
 
 namespace GCSDK
 {
@@ -35,8 +31,8 @@ void EmitBaseMessageV( const char *pchGroupName, SpewType_t spewType, int iSpewL
 {
 	VPROF_BUDGET( "GCHost", VPROF_BUDGETGROUP_STEAM );
 
-	char pchBuf[ MAX_LOGGING_MESSAGE_LENGTH ];
-	Q_vsnprintf( pchBuf, MAX_LOGGING_MESSAGE_LENGTH, pchMsg, vaArgs );
+	char *pchBuf = GetPchTempTextBuffer();
+	Q_vsnprintf( pchBuf, GetCchTempTextBuffer(), pchMsg, vaArgs );
 
 #ifdef GC
 // !FIXME! DOTAMERGE

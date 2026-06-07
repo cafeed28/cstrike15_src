@@ -13,10 +13,12 @@
 #include "steam/steam_api.h"
 #include "jobmgr.h"
 #include "sharedobject.h"
+#include "gcsdk_gcmessages.pb.h"
 
 class ISteamGameCoordinator;
 struct GCMessageAvailable_t;
 class CTestEvent;
+class CGCClientSystem;
 
 namespace GCSDK
 {
@@ -49,7 +51,7 @@ public:
 	void SetSessionNeed( uint32 nSessionNeed, bool bWantSession );
 
 	/// Launcher value.  Sent in the HELLO message
-	void SetLauncherType( uint32 nLauncherType ) { m_nLauncherType = nLauncherType; }
+	void SetLauncherType( GCClientLauncherType nLauncherType ) { m_nLauncherType = nLauncherType; }
 
 	/// Steam datagram port, for servers.  Sent in the HELLO message
 	void SetServerSteamdatagramPort( uint16 usPort ) { m_usSteamdatagramPort = usPort; }
@@ -106,9 +108,12 @@ public:
 	/// Send a HELLO message to the GC now.
 	void SendHello();
 
+	void ProcessWelcomeMsg( const CMsgClientWelcome &msg );
+
 	// Called when we receive a welcome message, to sync up our SO caches with the
 	// what the GC is telling us we have.
 	void ProcessSOCacheSubscribedMsg( const CMsgSOCacheSubscribed &msg );
+	void ProcessCacheSubscriptionCheckMsg( const CMsgSOCacheSubscriptionCheck &msg );
 
 	/// Simulate inability to connect to DOTA's GC.
 	/// (But allow us to connect to Steam.)
@@ -149,22 +154,23 @@ protected:
 
 	SharedObjectListensersVec_t m_vecListeners;
 
-	uint64 m_timeLastSendHello;
-	uint64 m_timeReceivedConnectionStatus;
-	uint64 m_timeLoggedOn;
+	CJobTime m_timeLastSendHello;
+	CJobTime m_timeReceivedConnectionStatus;
+	CJobTime m_timeLoggedOn;
 	uint32 m_unVersion;
+	GCConnectionStatus m_nConnectionStatus;
 	const bool m_bGameserver;
 	bool m_bSimulateGCConnectionFailure;
 	uint32 m_nSessionNeed;
 	uint32 m_nLastSessionNeed; // last session need state sent / received from the GC
 	bool m_bWantSession;
-	uint32 m_nLauncherType;
+	GCClientLauncherType m_nLauncherType;
 	uint16 m_usSteamdatagramPort;
 
 	int m_nLogonQueuePosition;
 	int m_nLogonQueueSize;
-	uint64 m_timeLogonQueueApproxTimeEnteredQueue;
-	uint64 m_timeLogonQueueEstimatedTimeExitQueue;
+	CJobTime m_timeLogonQueueApproxTimeEnteredQueue;
+	CJobTime m_timeLogonQueueEstimatedTimeExitQueue;
 
 	void ClearLogonQueueStats();
 
@@ -181,6 +187,7 @@ protected:
 	STEAM_CALLBACK( CGCClient, OnSteamServersConnected, SteamServersConnected_t, m_CallbackSteamServersConnected );
 #endif
 
+	friend CGCClientSystem;
 };
 
 //utility to make defining client jobs more straight forward

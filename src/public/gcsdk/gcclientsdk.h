@@ -11,6 +11,7 @@
 #pragma once
 #endif
 
+#include "gcsteamdefines.h"
 #include "tier0/platform.h"
 #include "steam/steamtypes.h"
 
@@ -34,11 +35,13 @@
 
 // public stuff
 #include "steam/steamclientpublic.h"
+#include "misc.h"
 #include "steam/isteamclient.h"
 #include "steam/isteamgamecoordinator.h"
 #include "steam/steam_api.h"
 
 // stuff to include early because it is widely depended on
+#include "string_misc.h"
 #include "netpacket.h"
 #include "gcmsg.h"
 #include "msgprotobuf.h"
@@ -58,6 +61,9 @@
 #include "gcclient_sharedobjectcache.h"
 #include "gcclient.h"
 #include "gcclientjob.h"
+#include "gcsystemmsgs.h"
+
+#include "webapi_response.h"
 
 // this is a hack to make sure that the funny Valve override of 
 // offsetof survives the STL includes that happened because of the
