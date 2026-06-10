@@ -147,6 +147,10 @@
 #include "IGameUIFuncs.h"
 #endif
 
+#if !defined( NO_STEAM_GAMECOORDINATOR )
+#include "gc_clientsystem.h"
+#endif
+
 #include "CegClientWrapper.h"
 
 extern IToolFrameworkServer *g_pToolFrameworkServer;

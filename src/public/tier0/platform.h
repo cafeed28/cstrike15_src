@@ -127,11 +127,6 @@
 
 #else
 
-// No game coordinator for Partner depot
-#if !defined( NO_STEAM_GAMECOORDINATOR )
-	#define NO_STEAM_GAMECOORDINATOR
-#endif
-
 	#include <malloc.h>
 	#include <memory.h>
 	#include <limits.h>
